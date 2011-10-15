@@ -15,7 +15,7 @@ Token::Token(const Coordinate & coordinate, const int price) : coordinate(coordi
 Token::~Token() {
 }
 
-Coordinate Token::getCoorinate() const {
+Coordinate Token::getCoordinate() const {
 	return this->coordinate;
 }
 

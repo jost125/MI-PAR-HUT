@@ -13,7 +13,7 @@
 class Token {
 public:
     Token(const Coordinate & coordinate, const int price);
-    Coordinate getCoorinate() const;
+    Coordinate getCoordinate() const;
     int getPrice() const;
     ~Token();
 private:
