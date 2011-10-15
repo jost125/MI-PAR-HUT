@@ -15,9 +15,11 @@ class Matrix {
             int height;
             int width;
             int ** fields;
+            void initFields();
         public:
             Matrix(int const width, int const height);
-            ~Matrix();
+            Matrix(const Matrix & matrix);
+            virtual ~Matrix();
             void setValue(const Coordinate & coordinate, int const value);
             int getValue(const Coordinate & coordinate) const;
             int getWidth() const;

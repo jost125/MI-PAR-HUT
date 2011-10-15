@@ -6,6 +6,10 @@
 Matrix::Matrix(const int width, const int height) {
 	this->width = width;
 	this->height = height;
+	this->initFields();
+}
+
+void Matrix::initFields() {
 	this->fields = new int*[height];
 
 	for (int y = 0; y < height; y++) {
@@ -16,11 +20,16 @@ Matrix::Matrix(const int width, const int height) {
 	}
 }
 
+Matrix::Matrix(const Matrix & matrix) {
+	this->height = matrix.height;
+	this->width = matrix.width;
+	this->initFields();
+}
+
 Matrix::~Matrix() {
 	for (int y = 0; y < this->height; y++) {
 		delete [] this->fields[y];
 	}
-//	delete [] this->fields;
 }
 
 int Matrix::getValue(const Coordinate & coordinate) const {
