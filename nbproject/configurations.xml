@@ -4,22 +4,26 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>Configuration.h</itemPath>
       <itemPath>Coordinate.h</itemPath>
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
       <itemPath>MatrixRenderer.h</itemPath>
       <itemPath>Stack.h</itemPath>
       <itemPath>Token.h</itemPath>
+      <itemPath>TokenPlacer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>Configuration.cpp</itemPath>
       <itemPath>Coordinate.cpp</itemPath>
       <itemPath>Matrix.cpp</itemPath>
       <itemPath>MatrixRandomGenerator.cpp</itemPath>
       <itemPath>MatrixRenderer.cpp</itemPath>
       <itemPath>Stack.cpp</itemPath>
       <itemPath>Token.cpp</itemPath>
+      <itemPath>TokenPlacer.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"

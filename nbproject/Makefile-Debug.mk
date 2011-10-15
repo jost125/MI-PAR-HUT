@@ -34,7 +34,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/TokenPlacer.o \
 	${OBJECTDIR}/Matrix.o \
+	${OBJECTDIR}/Configuration.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
@@ -67,10 +69,20 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/hut: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/hut ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
+${OBJECTDIR}/TokenPlacer.o: TokenPlacer.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/TokenPlacer.o TokenPlacer.cpp
+
 ${OBJECTDIR}/Matrix.o: Matrix.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Matrix.o Matrix.cpp
+
+${OBJECTDIR}/Configuration.o: Configuration.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Configuration.o Configuration.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}

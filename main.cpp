@@ -58,11 +58,12 @@ int main(int argc, char** argv) {
 		return -4;
 	}
 	
-	
-	
 	Matrix matrix = Matrix(matrixHeight, matrixWidth);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
+
+	// Debug output
 	MatrixRenderer(&matrix).render();
-	
 	return 0;
 }
+
+
