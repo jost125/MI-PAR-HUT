@@ -12,6 +12,11 @@ Coordinate::Coordinate(int const x, int const y) {
 	this->y = y;
 }
 
+Coordinate::Coordinate(const Coordinate & coordinate) {
+	this->x = coordinate.x;
+	this->y = coordinate.y;
+}
+
 Coordinate::~Coordinate() {
 }
 
