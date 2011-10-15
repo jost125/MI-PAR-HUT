@@ -16,7 +16,7 @@ using namespace std;
  * 
  */
 int main(int argc, char** argv) {
-	Matrix matrix = Matrix(5, 6);
+	Matrix matrix = Matrix(5, 8);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 	MatrixRenderer(&matrix).render();
 	
