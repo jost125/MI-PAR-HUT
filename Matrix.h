@@ -19,10 +19,10 @@ class Matrix {
             Matrix(int const width, int const height);
             ~Matrix();
             void setValue(const Coordinate & coordinate, int const value);
-            int getValue(const Coordinate & coordinate);
-            int getWidth();
-            int getHeight();
-            bool isCoordinateInside(const Coordinate & coordinate);
+            int getValue(const Coordinate & coordinate) const;
+            int getWidth() const;
+            int getHeight() const;
+            bool isCoordinateInside(const Coordinate & coordinate) const;
 };
 
 #endif	/* MATRIX_H */

@@ -23,7 +23,7 @@ Matrix::~Matrix() {
 //	delete [] this->fields;
 }
 
-int Matrix::getValue(const Coordinate & coordinate) {
+int Matrix::getValue(const Coordinate & coordinate) const {
 	if (!this->isCoordinateInside(coordinate)) {
 		throw std::runtime_error("Coordinate is out of matrix");
 	}
@@ -37,15 +37,15 @@ void Matrix::setValue(const Coordinate & coordinate, int const value) {
 	this->fields[coordinate.getY()][coordinate.getX()] = value;
 }
 
-bool Matrix::isCoordinateInside(const Coordinate & coordinate) {
+bool Matrix::isCoordinateInside(const Coordinate & coordinate) const {
 	return coordinate.getY() >= 0 && coordinate.getX() >= 0 &&
 		coordinate.getY() < this->height && coordinate.getX() < this->width;
 }
 
-int Matrix::getHeight() {
+int Matrix::getHeight() const {
 	return this->height;
 }
 
-int Matrix::getWidth() {
+int Matrix::getWidth() const {
 	return this->width;
 }
