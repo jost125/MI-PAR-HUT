@@ -35,11 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/Matrix.o \
-	${OBJECTDIR}/TosPlacer.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
-	${OBJECTDIR}/Posloupnost.o \
 	${OBJECTDIR}/MatrixRandomGenerator.o
 
 
@@ -72,11 +70,6 @@ ${OBJECTDIR}/Matrix.o: Matrix.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Matrix.o Matrix.cpp
 
-${OBJECTDIR}/TosPlacer.o: TosPlacer.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/TosPlacer.o TosPlacer.cpp
-
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -91,11 +84,6 @@ ${OBJECTDIR}/Coordinate.o: Coordinate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Coordinate.o Coordinate.cpp
-
-${OBJECTDIR}/Posloupnost.o: Posloupnost.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Posloupnost.o Posloupnost.cpp
 
 ${OBJECTDIR}/MatrixRandomGenerator.o: MatrixRandomGenerator.cpp 
 	${MKDIR} -p ${OBJECTDIR}

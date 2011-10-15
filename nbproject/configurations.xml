@@ -8,8 +8,6 @@
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
       <itemPath>MatrixRenderer.h</itemPath>
-      <itemPath>Posloupnost.h</itemPath>
-      <itemPath>TosPlacer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -18,8 +16,6 @@
       <itemPath>Matrix.cpp</itemPath>
       <itemPath>MatrixRandomGenerator.cpp</itemPath>
       <itemPath>MatrixRenderer.cpp</itemPath>
-      <itemPath>Posloupnost.cpp</itemPath>
-      <itemPath>TosPlacer.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -43,7 +39,7 @@
     <conf name="Debug" type="1">
       <toolsSet>
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>default</compilerSet>
+        <compilerSet>GNU|GNU</compilerSet>
       </toolsSet>
       <compileType>
       </compileType>
