@@ -12,7 +12,7 @@ class Coordinate {
     public:
         Coordinate(int const x, int const y);
         Coordinate(const Coordinate & coordinate);
-        ~Coordinate();
+        virtual ~Coordinate();
         int getX() const;
         int getY() const;
     private:
