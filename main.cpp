@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 		return -4;
 	}
 	
-	Matrix matrix = Matrix(matrixHeight, matrixWidth);
+	Matrix matrix = Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
 	// Debug output
