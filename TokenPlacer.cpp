@@ -10,6 +10,8 @@
 TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken) : matrix(matrix) {
 	this->maxTokens = maxTokens;
 	this->pricePerToken = pricePerToken;
+	std::vector<Coordinate> emptyList = std::vector<Coordinate>();
+	this->bestConfiguration = new Configuration(emptyList);
 }
 
 TokenPlacer::TokenPlacer(const TokenPlacer& orig) : matrix(orig.matrix) {
@@ -50,10 +52,8 @@ Configuration TokenPlacer::findBestConfiguration() {
 
 		// Compare with best solution.
 		if (currentPrice > this->bestPrice) {
-			// It's better, so delete previous configuration.
-			if (this->bestPrice != TokenPlacer::UNDEFINED_PRICE) {
-				delete this->bestConfiguration;
-			}
+			// Delete previous configuration.
+			delete this->bestConfiguration;
 
 			// Save current solution as best solution.
 			this->bestPrice = currentPrice;
