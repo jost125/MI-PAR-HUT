@@ -28,12 +28,12 @@ private:
     std::vector<Configuration> stack;
 
     void constructStack();
-    Configuration getNextConfiguration(const Configuration & configuration) const;
     bool existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
+    Configuration getNextConfiguration(const Configuration & configuration) const;
     int countPrice(const Configuration & configuration) const;
     void generateEachCombination(const int numberOfTokens);
-    int mapCoordinateOnIndex(const Coordinate & coordinate);
-    Coordinate mapIndexOnCoordinate(const int index);
+    int mapCoordinateOnIndex(const Coordinate & coordinate) const;
+    Coordinate mapIndexOnCoordinate(const int index) const;
 };
 
 #endif	/* TOKENPLACER_H */

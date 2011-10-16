@@ -43,23 +43,31 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 }
 
 bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
-	
+	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
+	for (int i = 0; i < numberOfTokens; i++) {
+		Coordinate c = this->mapIndexOnCoordinate(position);
+		if (!configuration.contains(c)) {
+			return true;
+		}
+		position--;
+	}
+	return false;
 }
 
 Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration) const {
-	
+		
 }
 
-Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) {
+Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) const {
 	if (index >= this->matrix.getHeight() * this->matrix.getWidth()) {
 		throw std::runtime_error("Index is out of range.");
 	}
 	int x = index % this->matrix.getWidth();
 	int y = index / this->matrix.getWidth();
-	return Coordinate(x,y);
+	return Coordinate(x, y);
 }
 
-int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) {
+int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) const {
 	if (!this->matrix.isCoordinateInside(coordinate)) {
 		throw std::runtime_error("Coordinates are out of matrix.");
 	}
