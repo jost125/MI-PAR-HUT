@@ -19,3 +19,13 @@ Configuration::~Configuration() {
 	
 }
 
+bool Configuration::contains(const Coordinate & coordinate) const {
+	for (int i = 0; i < this->coordinates.size(); i++) {
+		if (coordinate.getX() == this->coordinates.at(i).getX() &&
+				  coordinate.getY() == this->coordinates.at(i).getY()) {
+			return true;
+		}
+	}
+	return false;
+}
+
