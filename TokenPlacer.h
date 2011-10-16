@@ -7,7 +7,6 @@
 
 #include "Matrix.h"
 #include "Configuration.h"
-#include "Stack.h"
 #include <vector>
 
 #ifndef TOKENPLACER_H
@@ -33,8 +32,8 @@ private:
     int countPrice(const Configuration & configuration) const;
     Configuration getInitialConfiguration() const;
     void generateEachCombination(const int numberOfTokens);
-    static Coordinate mapIndexOnCoordinate(const int index);
-    static int mapCoordinateOnIndex(const Coordinate & coordinate);
+    int mapCoordinateOnIndex(const Coordinate & coordinate);
+    Coordinate mapIndexOnCoordinate(const int index);
 };
 
 #endif	/* TOKENPLACER_H */

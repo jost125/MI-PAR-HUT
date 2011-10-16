@@ -40,7 +40,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
-	${OBJECTDIR}/Stack.o \
 	${OBJECTDIR}/MatrixRandomGenerator.o
 
 
@@ -97,11 +96,6 @@ ${OBJECTDIR}/Coordinate.o: Coordinate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Coordinate.o Coordinate.cpp
-
-${OBJECTDIR}/Stack.o: Stack.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Stack.o Stack.cpp
 
 ${OBJECTDIR}/MatrixRandomGenerator.o: MatrixRandomGenerator.cpp 
 	${MKDIR} -p ${OBJECTDIR}

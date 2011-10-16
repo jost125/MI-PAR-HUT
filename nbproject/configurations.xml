@@ -9,7 +9,6 @@
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
       <itemPath>MatrixRenderer.h</itemPath>
-      <itemPath>Stack.h</itemPath>
       <itemPath>TokenPlacer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -20,7 +19,6 @@
       <itemPath>Matrix.cpp</itemPath>
       <itemPath>MatrixRandomGenerator.cpp</itemPath>
       <itemPath>MatrixRenderer.cpp</itemPath>
-      <itemPath>Stack.cpp</itemPath>
       <itemPath>TokenPlacer.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"

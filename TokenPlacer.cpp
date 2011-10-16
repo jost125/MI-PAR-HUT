@@ -6,6 +6,7 @@
  */
 
 #include "TokenPlacer.h"
+#include <stdexcept>
 
 TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken) : matrix(matrix) {
 	this->maxTokens = maxTokens;
@@ -31,12 +32,20 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 	
 }
 
-static Coordinate mapIndexOnCoordinate(const int index) {
-	
+Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) {
+	if (index >= this->matrix.getHeight() * this->matrix.getWidth()) {
+		throw std::runtime_error("Index is out of range.");
+	}
+	int x = index % this->matrix.getWidth();
+	int y = index / this->matrix.getWidth();
+	return Coordinate(x,y);
 }
 
-static int mapCoordinateOnIndex(const Coordinate & coordinate) {
-
+int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) {
+	if (!this->matrix.isCoordinateInside(coordinate)) {
+		throw std::runtime_error("Coordinates are out of matrix.");
+	}
+	return (coordinate.getY() * this->matrix.getWidth()) + coordinate.getX();
 }
 
 Configuration TokenPlacer::findBestConfiguration() {
@@ -48,7 +57,8 @@ Configuration TokenPlacer::findBestConfiguration() {
 		stack.pop_back();
 
 		// Count price.
-		int currentPrice = this->countPrice(currentConfiguration);
+//		int currentPrice = this->countPrice(currentConfiguration);
+		int currentPrice = 0;
 
 		// Compare with best solution.
 		if (currentPrice > this->bestPrice) {
