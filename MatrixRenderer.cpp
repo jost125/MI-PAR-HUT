@@ -13,8 +13,8 @@ MatrixRenderer::MatrixRenderer(Matrix * matrix) {
 }
 
 void MatrixRenderer::render() {
-	for (int x = 0; x < this->matrix->getWidth(); x++) {
-		for (int y = 0; y < this->matrix->getHeight(); y++) {
+	for (int y = 0; y < this->matrix->getHeight(); y++) {
+		for (int x = 0; x < this->matrix->getWidth(); x++) {
 			Coordinate c = Coordinate(x, y);
 			std::cout << this->matrix->getValue(c) << ' ';
 		}

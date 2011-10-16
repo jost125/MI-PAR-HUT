@@ -10,12 +10,12 @@ Matrix::Matrix(const int width, const int height) {
 }
 
 void Matrix::initFields() {
-	this->fields = new int*[height];
+	this->fields = new int*[width];
 
-	for (int y = 0; y < height; y++) {
-		this->fields[y] = new int[width];
-		for (int x = 0; x < width; x++) {
-			this->fields[y][x] = 0;
+	for (int x = 0; x < width; x++) {
+		this->fields[x] = new int[height];
+		for (int y = 0; y < height; y++) {
+			this->fields[x][y] = 0;
 		}
 	}
 }
@@ -27,8 +27,8 @@ Matrix::Matrix(const Matrix & matrix) {
 }
 
 Matrix::~Matrix() {
-	for (int y = 0; y < this->height; y++) {
-		delete [] this->fields[y];
+	for (int x = 0; x < this->width; x++) {
+		delete [] this->fields[x];
 	}
 }
 
@@ -36,14 +36,14 @@ int Matrix::getValue(const Coordinate & coordinate) const {
 	if (!this->isCoordinateInside(coordinate)) {
 		throw std::runtime_error("Coordinate is out of matrix");
 	}
-	return this->fields[coordinate.getY()][coordinate.getX()];
+	return this->fields[coordinate.getX()][coordinate.getY()];
 }
 
 void Matrix::setValue(const Coordinate & coordinate, int const value) {
 	if (!this->isCoordinateInside(coordinate)) {
 		throw std::runtime_error("Coordinate is out of matrix");
 	}
-	this->fields[coordinate.getY()][coordinate.getX()] = value;
+	this->fields[coordinate.getX()][coordinate.getY()] = value;
 }
 
 bool Matrix::isCoordinateInside(const Coordinate & coordinate) const {
