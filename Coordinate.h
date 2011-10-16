@@ -17,6 +17,7 @@ class Coordinate {
         virtual ~Coordinate();
         int getX() const;
         int getY() const;
+        int manhattanDistance(Coordinate coordinate) const;
     private:
         int x;
         int y;

@@ -5,6 +5,8 @@
  * Created on September 22, 2011, 11:33 PM
  */
 
+#include <stdlib.h>
+
 #include "Coordinate.h"
 
 Coordinate::Coordinate(int const x, int const y) {
@@ -31,4 +33,8 @@ int Coordinate::getY() const {
 std::ostream & operator << (std::ostream &os, Coordinate & coordinate) {
 	os << '[' << coordinate.getX() << ',' << coordinate.getY() << ']';
 	return os;
+}
+
+int Coordinate::manhattanDistance(Coordinate coordinate) const {
+	return abs(this->getX() - coordinate.getX()) + abs(this->getY() - coordinate.getY());
 }
