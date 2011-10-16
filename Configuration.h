@@ -5,6 +5,7 @@
  * Created on October 15, 2011, 7:24 PM
  */
 
+#include <vector>
 #include "Coordinate.h"
 
 #ifndef CONFIGURATION_H
@@ -12,11 +13,11 @@
 
 class Configuration {
     public:
-        Configuration(Coordinate * coordinates, const int length);
-        Configuration(const Configuration& orig);
+        Configuration(std::vector<Coordinate> coordinates);
+        Configuration(const Configuration & orig);
         virtual ~Configuration();
-        int countPrice() const;
     private:
+        std::vector<Coordinate> coordinates;
 };
 
 #endif	/* CONFIGURATION_H */

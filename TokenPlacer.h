@@ -14,7 +14,7 @@
 class TokenPlacer {
 public:
     TokenPlacer(const Matrix & matrix);
-    TokenPlacer(const TokenPlacer& orig);
+    TokenPlacer(const TokenPlacer & orig);
     virtual ~TokenPlacer();
     Configuration findBestConfiguration();
 private:

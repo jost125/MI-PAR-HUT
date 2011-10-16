@@ -7,12 +7,15 @@
 
 #include "Configuration.h"
 
-Configuration::Configuration(Coordinate * coordinates, const int length) {
+Configuration::Configuration(std::vector<Coordinate> coordinates) {
+	this->coordinates = coordinates;
 }
 
-Configuration::Configuration(const Configuration& orig) {
+Configuration::Configuration(const Configuration & orig) {
+	this->coordinates = orig.coordinates;
 }
 
 Configuration::~Configuration() {
+	
 }
 
