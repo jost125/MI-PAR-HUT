@@ -17,6 +17,7 @@ class Configuration {
         Configuration(const Configuration & orig);
         virtual ~Configuration();
         bool contains(const Coordinate & coordinate) const;
+        std::vector<Coordinate> getCoordinates();
     private:
         std::vector<Coordinate> coordinates;
 };

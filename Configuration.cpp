@@ -29,3 +29,7 @@ bool Configuration::contains(const Coordinate & coordinate) const {
 	return false;
 }
 
+std::vector<Coordinate> Configuration::getCoordinates() {
+	return this->coordinates;
+}
+
