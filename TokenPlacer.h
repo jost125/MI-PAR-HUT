@@ -29,7 +29,7 @@ private:
 
     void constructStack();
     bool existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
-    Configuration getNextConfiguration(const Configuration & configuration) const;
+    Configuration getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
     int countPrice(const Configuration & configuration) const;
     void generateEachCombination(const int numberOfTokens);
     int mapCoordinateOnIndex(const Coordinate & coordinate) const;

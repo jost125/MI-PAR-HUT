@@ -1,10 +1,3 @@
-/* 
- * File:   TokenPlacer.cpp
- * Author: honza
- * 
- * Created on October 15, 2011, 7:33 PM
- */
-
 #include "TokenPlacer.h"
 #include <stdexcept>
 
@@ -37,7 +30,7 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 	this->stack.push_back(currentConfiguration);
 
 	while (this->existsNextConfiguration(currentConfiguration, numberOfTokens)) {
-		currentConfiguration = this->getNextConfiguration(currentConfiguration);
+		currentConfiguration = this->getNextConfiguration(currentConfiguration, numberOfTokens);
 		this->stack.push_back(currentConfiguration);
 	}
 }
@@ -54,8 +47,34 @@ bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, c
 	return false;
 }
 
-Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration) const {
-		
+Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
+	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
+	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+
+	Coordinate * coordinate;
+	for (int i = 0; i < numberOfTokens; i++) {
+		coordinate = &coordinates.back();
+		if (position == this->mapCoordinateOnIndex(*coordinate)) {
+			// Look further.
+			position--;
+			coordinates.pop_back();
+		} else {
+			// Create new configuration.
+			break;
+		}
+	}
+
+	int coordinateIndex = this->mapCoordinateOnIndex(Coordinate(*coordinate));
+	Coordinate movedCoordinate = this->mapIndexOnCoordinate(++coordinateIndex);
+
+	coordinates.pop_back();
+	coordinates.push_back(movedCoordinate);
+
+	while (coordinates.size() == numberOfTokens) {
+		coordinates.push_back(this->mapIndexOnCoordinate(++coordinateIndex));
+	}
+
+	return Configuration(coordinates);
 }
 
 Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) const {

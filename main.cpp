@@ -10,6 +10,7 @@
 #include "Matrix.h"
 #include "MatrixRenderer.h"
 #include "MatrixRandomGenerator.h"
+#include "TokenPlacer.h"
 
 using namespace std;
 
@@ -62,7 +63,11 @@ int main(int argc, char** argv) {
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
 	// Debug output
-	MatrixRenderer(&matrix).render();
+//	MatrixRenderer(&matrix).render();
+
+	TokenPlacer tp = TokenPlacer(matrix, maxTokens, pricePerToken);
+//	tp.findBestConfiguration();
+
 	return 0;
 }
 
