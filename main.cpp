@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	int matrixWidth;
 	int matrixHeight;
 	int maxTokens;
-	int priceForToken;
+	int pricePerToken;
 	
 	/**
 		Inputs.
@@ -51,9 +51,9 @@ int main(int argc, char** argv) {
 	}
 	
 	cout << "Enter price for token:" << endl;
-	cin >> priceForToken;
+	cin >> pricePerToken;
 	
-	if (priceForToken < 1 || priceForToken > 100) {
+	if (pricePerToken < 1 || pricePerToken > 100) {
 		cerr << "Error: Price for token must be between 1 and 100." << endl;
 		return -4;
 	}
