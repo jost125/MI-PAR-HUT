@@ -33,3 +33,10 @@ std::vector<Coordinate> Configuration::getCoordinates() const {
 	return this->coordinates;
 }
 
+std::ostream & operator << (std::ostream & os, Configuration & configuration) {
+	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+	for (int i = 0; i < coordinates.size(); i++) {
+		os << coordinates.at(i);
+	}
+	return os;
+}

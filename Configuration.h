@@ -6,6 +6,7 @@
  */
 
 #include <vector>
+#include <ostream>
 #include "Coordinate.h"
 
 #ifndef CONFIGURATION_H
@@ -21,5 +22,7 @@ class Configuration {
     private:
         std::vector<Coordinate> coordinates;
 };
+
+std::ostream & operator << (std::ostream & os, Configuration & configuration);
 
 #endif	/* CONFIGURATION_H */

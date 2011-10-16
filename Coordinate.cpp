@@ -27,3 +27,8 @@ int Coordinate::getX() const {
 int Coordinate::getY() const {
 	return this->y;
 }
+
+std::ostream & operator << (std::ostream &os, Coordinate & coordinate) {
+	os << '[' << coordinate.getX() << ',' << coordinate.getY() << ']';
+	return os;
+}

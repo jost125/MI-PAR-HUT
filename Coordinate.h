@@ -5,6 +5,8 @@
  * Created on September 22, 2011, 11:33 PM
  */
 
+#include <ostream>
+
 #ifndef COORDINATE_H
 #define	COORDINATE_H
 
@@ -19,6 +21,8 @@ class Coordinate {
         int x;
         int y;
 };
+
+std::ostream & operator << (std::ostream &os, Coordinate & coordinate);
 
 #endif	/* COORDINATE_H */
 
