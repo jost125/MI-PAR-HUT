@@ -7,23 +7,34 @@
 
 #include "Matrix.h"
 #include "Configuration.h"
+#include "Stack.h"
+#include <vector>
 
 #ifndef TOKENPLACER_H
 #define	TOKENPLACER_H
 
 class TokenPlacer {
 public:
-    TokenPlacer(const Matrix & matrix);
+    TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken);
     TokenPlacer(const TokenPlacer & orig);
     virtual ~TokenPlacer();
     Configuration findBestConfiguration();
 private:
+    static const int UNDEFINED_PRICE = -1;
     int bestPrice;
+    int maxTokens;
+    int pricePerToken;
     Matrix matrix;
     Configuration * bestConfiguration;
-    Configuration * actualConfiguration;
-    
-    Configuration getNextConfiguration();
+    std::vector<Configuration> stack;
+
+    void constructStack();
+    Configuration getNextConfiguration(const Configuration & configuration) const;
+    int countPrice(const Configuration & configuration) const;
+    Configuration getInitialConfiguration() const;
+    void generateEachCombination(const int numberOfTokens);
+    static Coordinate mapIndexOnCoordinate(const int index);
+    static int mapCoordinateOnIndex(const Coordinate & coordinate);
 };
 
 #endif	/* TOKENPLACER_H */
