@@ -1,7 +1,11 @@
 #include "TokenPlacer.h"
 #include <stdexcept>
 
+#include <iostream>
+using namespace std;
+
 TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken) : matrix(matrix) {
+	this->matrix = matrix;
 	this->maxTokens = maxTokens;
 	this->pricePerToken = pricePerToken;
 	std::vector<Coordinate> emptyList = std::vector<Coordinate>();
@@ -102,7 +106,7 @@ Configuration TokenPlacer::findBestConfiguration() {
 		stack.pop_back();
 
 		// Count price.
-		int currentPrice = this->countPrice(currentConfiguration);
+		double currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
 		if (currentPrice > this->bestPrice) {
@@ -115,7 +119,37 @@ Configuration TokenPlacer::findBestConfiguration() {
 		}
 	}
 }
-
-int TokenPlacer::countPrice(const Configuration & configuration) const {
 	
+double TokenPlacer::countPrice(const Configuration & configuration) const {
+	double totalPrice = 0;
+	
+	// Count price for each field.
+	for (int x = 0; x < this->matrix.getWidth(); x++) {
+		for (int y = 0; y < this->matrix.getHeight(); y++) {
+			// Find the shortest way from field to token.
+			cout << "-----------------------" << endl;
+			int minDistance = -1;
+			for (int k = 0; k < configuration.getCoordinates().size(); k++) {
+				int distance = configuration.getCoordinates().at(k).manhattanDistance(Coordinate(x, y));
+				if (distance == 0) {
+					minDistance = distance;
+					break;
+				}
+				
+				if (distance < minDistance || minDistance == -1) {
+					minDistance = distance;
+				}
+			}
+			cout << "MINIMAL DISTANCE: " << minDistance << endl;
+			// We should have minimal distance, so count the price.
+			if (minDistance != -1) {
+				Coordinate c = Coordinate(x, y);
+				totalPrice += (double)this->matrix.getValue(c) / (double)(1 + minDistance);
+				cout << "VALUE:" << this->matrix.getValue(c) << " | += " << (double)this->matrix.getValue(c) / (double)(1 + minDistance) << endl;
+			}
+		}
+	}
+	// Subtract tokens * pricePerToken.
+	totalPrice -= configuration.getCoordinates().size() * this->pricePerToken;
+	return totalPrice;
 }

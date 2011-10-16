@@ -18,9 +18,10 @@ public:
     TokenPlacer(const TokenPlacer & orig);
     virtual ~TokenPlacer();
     Configuration findBestConfiguration();
+    double countPrice(const Configuration & configuration) const;
 private:
     static const int UNDEFINED_PRICE = -1;
-    int bestPrice;
+    double bestPrice;
     int maxTokens;
     int pricePerToken;
     Matrix matrix;
@@ -30,7 +31,6 @@ private:
     void constructStack();
     bool existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
     Configuration getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
-    int countPrice(const Configuration & configuration) const;
     void generateEachCombination(const int numberOfTokens);
     int mapCoordinateOnIndex(const Coordinate & coordinate) const;
     Coordinate mapIndexOnCoordinate(const int index) const;
