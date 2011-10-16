@@ -29,6 +29,24 @@ void TokenPlacer::constructStack() {
 }
 
 void TokenPlacer::generateEachCombination(const int numberOfTokens) {
+	std::vector<Coordinate> coordinateList = std::vector<Coordinate>();
+	for (int index = 0; index < numberOfTokens; index++) {
+		coordinateList.push_back(Coordinate(this->mapIndexOnCoordinate(index)));
+	}
+	Configuration currentConfiguration = Configuration(coordinateList);
+	this->stack.push_back(currentConfiguration);
+
+	while (this->existsNextConfiguration(currentConfiguration, numberOfTokens)) {
+		currentConfiguration = this->getNextConfiguration(currentConfiguration);
+		this->stack.push_back(currentConfiguration);
+	}
+}
+
+bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
+	
+}
+
+Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration) const {
 	
 }
 
@@ -57,8 +75,7 @@ Configuration TokenPlacer::findBestConfiguration() {
 		stack.pop_back();
 
 		// Count price.
-//		int currentPrice = this->countPrice(currentConfiguration);
-		int currentPrice = 0;
+		int currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
 		if (currentPrice > this->bestPrice) {
@@ -72,12 +89,6 @@ Configuration TokenPlacer::findBestConfiguration() {
 	}
 }
 
-Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration) const {
+int TokenPlacer::countPrice(const Configuration & configuration) const {
 	
-}
-
-Configuration TokenPlacer::getInitialConfiguration() const {
-	std::vector<Coordinate> set;
-	set.push_back(Coordinate(1, 1));
-	return Configuration(set);
 }

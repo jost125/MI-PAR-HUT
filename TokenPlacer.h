@@ -29,8 +29,8 @@ private:
 
     void constructStack();
     Configuration getNextConfiguration(const Configuration & configuration) const;
+    bool existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
     int countPrice(const Configuration & configuration) const;
-    Configuration getInitialConfiguration() const;
     void generateEachCombination(const int numberOfTokens);
     int mapCoordinateOnIndex(const Coordinate & coordinate);
     Coordinate mapIndexOnCoordinate(const int index);
