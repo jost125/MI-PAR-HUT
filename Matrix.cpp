@@ -10,26 +10,23 @@ Matrix::Matrix(const int width, const int height) {
 }
 
 void Matrix::initFields() {
-	this->fields = new int*[width];
-
-	for (int x = 0; x < width; x++) {
-		this->fields[x] = new int[height];
-		for (int y = 0; y < height; y++) {
-			this->fields[x][y] = 0;
+	this->fields = std::vector<std::vector<int> >();
+	for (int x = 0; x < this->width; x++) {
+		std::vector<int> row = std::vector<int>();
+		for (int y = 0; y < this->height; y++) {
+			row.push_back(0);
 		}
+		this->fields.push_back(row);
 	}
 }
 
 Matrix::Matrix(const Matrix & matrix) {
 	this->height = matrix.height;
 	this->width = matrix.width;
-	this->initFields();
+	this->fields = matrix.fields;
 }
 
 Matrix::~Matrix() {
-	for (int x = 0; x < this->width; x++) {
-		delete [] this->fields[x];
-	}
 }
 
 int Matrix::getValue(const Coordinate & coordinate) const {

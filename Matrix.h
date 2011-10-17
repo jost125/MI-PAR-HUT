@@ -6,6 +6,7 @@
  */
 
 #include "Coordinate.h"
+#include <vector>
 
 #ifndef MATRIX_H
 #define	MATRIX_H
@@ -14,8 +15,7 @@ class Matrix {
         private:
             int height;
             int width;
-            int ** fields;
-            void initFields();
+            std::vector<std::vector<int> > fields;
         public:
             Matrix(int const width, int const height);
             Matrix(const Matrix & matrix);
@@ -25,6 +25,7 @@ class Matrix {
             int getWidth() const;
             int getHeight() const;
             bool isCoordinateInside(const Coordinate & coordinate) const;
+            void initFields();
 };
 
 #endif	/* MATRIX_H */
