@@ -12,12 +12,14 @@
 #include "MatrixRandomGenerator.h"
 #include "TokenPlacer.h"
 
+#include <math.h>
+
 using namespace std;
 
 /*
  * 
  */
-int main(int argc, char** argv) { 
+int main(int argc, char** argv) {
 	int matrixWidth;
 	int matrixHeight;
 	int maxTokens;

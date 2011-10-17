@@ -14,13 +14,22 @@
 
 class Configuration {
     public:
-        Configuration(std::vector<Coordinate> coordinates);
+        Configuration(std::vector<Coordinate> coordinates, int matrixWidth, int matrixHeight);
         Configuration(const Configuration & orig);
         virtual ~Configuration();
         bool contains(const Coordinate & coordinate) const;
         std::vector<Coordinate> getCoordinates() const;
     private:
-        std::vector<Coordinate> coordinates;
+        unsigned long long * stash;
+        int matrixWidth;
+        int matrixHeight;
+        int stashSize;
+        unsigned short numberOfBits;
+
+        void insertCoordinatesToStash(std::vector<Coordinate> coordinates);
+        void enlargeStash(const int newStashSize);
+        int getSlot(const int index) const;
+        void addIndexToStash(const int index, const int slot);
 };
 
 std::ostream & operator << (std::ostream & os, Configuration & configuration);

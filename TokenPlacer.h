@@ -30,7 +30,7 @@ private:
 
     void constructStack();
     bool existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
-    Configuration getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const;
+    Configuration getNextConfiguration(const Configuration & configuration, const unsigned int & numberOfTokens) const;
     void generateEachCombination(const int numberOfTokens);
     int mapCoordinateOnIndex(const Coordinate & coordinate) const;
     Coordinate mapIndexOnCoordinate(const int index) const;

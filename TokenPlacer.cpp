@@ -7,7 +7,7 @@ TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int p
 	this->maxTokens = maxTokens;
 	this->pricePerToken = pricePerToken;
 	std::vector<Coordinate> emptyList = std::vector<Coordinate>();
-	this->bestConfiguration = new Configuration(emptyList);
+	this->bestConfiguration = new Configuration(emptyList, matrix.getWidth(), matrix.getHeight());
 }
 
 TokenPlacer::TokenPlacer(const TokenPlacer& orig) : matrix(orig.matrix) {
@@ -26,9 +26,9 @@ void TokenPlacer::constructStack() {
 void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 	std::vector<Coordinate> coordinateList = std::vector<Coordinate>();
 	for (int index = 0; index < numberOfTokens; index++) {
-		coordinateList.push_back(Coordinate(this->mapIndexOnCoordinate(index)));
+		coordinateList.push_back(Coordinate::createCoordinateFromIndex(index, this->matrix.getWidth()));
 	}
-	Configuration currentConfiguration = Configuration(coordinateList);
+	Configuration currentConfiguration = Configuration(coordinateList, this->matrix.getWidth(), this->matrix.getHeight());
 	this->stack.push_back(currentConfiguration);
 
 	do {
@@ -40,7 +40,7 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
 	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
 	for (int i = 0; i < numberOfTokens; i++) {
-		Coordinate c = this->mapIndexOnCoordinate(position);
+		Coordinate c = Coordinate::createCoordinateFromIndex(position, this->matrix.getWidth());
 		if (!configuration.contains(c)) {
 			return true;
 		}
@@ -49,14 +49,14 @@ bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, c
 	return false;
 }
 
-Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
+Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration, const unsigned int & numberOfTokens) const {
 	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
 	std::vector<Coordinate> coordinates = configuration.getCoordinates();
 
 	Coordinate * coordinate;
-	for (int i = 0; i < numberOfTokens; i++) {
+	for (unsigned int i = 0; i < numberOfTokens; i++) {
 		coordinate = &coordinates.back();
-		if (position == this->mapCoordinateOnIndex(*coordinate)) {
+		if (position == coordinate->toIndex(this->matrix.getWidth())) {
 			// Look further.
 			position--;
 			coordinates.pop_back();
@@ -65,34 +65,17 @@ Configuration TokenPlacer::getNextConfiguration(const Configuration & configurat
 			break;
 		}
 	}
-
-	int coordinateIndex = this->mapCoordinateOnIndex(Coordinate(*coordinate));
-	Coordinate movedCoordinate = this->mapIndexOnCoordinate(++coordinateIndex);
+	int coordinateIndex = coordinate->toIndex(this->matrix.getWidth());
+	Coordinate movedCoordinate = Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrix.getWidth());
 
 	coordinates.pop_back();
 	coordinates.push_back(movedCoordinate);
 
 	while (coordinates.size() < numberOfTokens) {
-		coordinates.push_back(this->mapIndexOnCoordinate(++coordinateIndex));
+		coordinates.push_back(Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrix.getWidth()));
 	}
 
-	return Configuration(coordinates);
-}
-
-Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) const {
-	if (index >= this->matrix.getHeight() * this->matrix.getWidth()) {
-		throw std::runtime_error("Index is out of range.");
-	}
-	int x = index % this->matrix.getWidth();
-	int y = index / this->matrix.getWidth();
-	return Coordinate(x, y);
-}
-
-int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) const {
-	if (!this->matrix.isCoordinateInside(coordinate)) {
-		throw std::runtime_error("Coordinates are out of matrix.");
-	}
-	return (coordinate.getY() * this->matrix.getWidth()) + coordinate.getX();
+	return Configuration(coordinates, this->matrix.getWidth(), this->matrix.getHeight());
 }
 
 Configuration TokenPlacer::findBestConfiguration() {

@@ -38,3 +38,11 @@ std::ostream & operator << (std::ostream &os, Coordinate & coordinate) {
 int Coordinate::manhattanDistance(Coordinate coordinate) const {
 	return abs(this->getX() - coordinate.getX()) + abs(this->getY() - coordinate.getY());
 }
+
+int Coordinate::toIndex(const int matrixWidth) const {
+	return (this->getY() * matrixWidth) + this->getX();
+}
+
+Coordinate Coordinate::createCoordinateFromIndex(const int index, const int matrixWidth) {
+	return Coordinate(index % matrixWidth, index / matrixWidth);
+}
