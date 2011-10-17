@@ -65,14 +65,13 @@ Configuration TokenPlacer::getNextConfiguration(const Configuration & configurat
 			break;
 		}
 	}
-
 	int coordinateIndex = this->mapCoordinateOnIndex(Coordinate(*coordinate));
 	Coordinate movedCoordinate = this->mapIndexOnCoordinate(++coordinateIndex);
 
 	coordinates.pop_back();
 	coordinates.push_back(movedCoordinate);
 
-	while (coordinates.size() <= numberOfTokens) {
+	while (coordinates.size() < numberOfTokens) {
 		coordinates.push_back(this->mapIndexOnCoordinate(++coordinateIndex));
 	}
 
@@ -103,8 +102,6 @@ Configuration TokenPlacer::findBestConfiguration() {
 		// Pop configuration from stack.
 		Configuration currentConfiguration = stack.back();
 		stack.pop_back();
-
-		std::cout << currentConfiguration << std::endl;
 
 		// Count price.
 		double currentPrice = this->countPrice(currentConfiguration);
