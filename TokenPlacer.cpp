@@ -11,6 +11,10 @@ TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int p
 }
 
 TokenPlacer::TokenPlacer(const TokenPlacer& orig) : matrix(orig.matrix) {
+	this->matrix = orig.matrix;
+	this->maxTokens = orig.maxTokens;
+	this->pricePerToken = orig.pricePerToken;
+	this->bestConfiguration = new Configuration(*orig.bestConfiguration);
 }
 
 TokenPlacer::~TokenPlacer() {
