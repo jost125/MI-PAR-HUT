@@ -18,8 +18,10 @@ class MatrixRenderer {
         void render(Configuration * config);
     private:
         Matrix * matrix;
-        void printLineDelimiter(int numberOfCells, int cellSize);
-        void printCellDelimiter(int alreadyWritten, int cellSize);
+        void printLineDelimiter(int numberOfCells, int cellSize, int flag) const;
+        static const int FIRST_LINE = 1;
+        static const int BOTTOM_LINE = 2;
+        static const int NORMAL_LINE = 3;
 };
 
 #endif	/* MATRIXRENDERER_H */
