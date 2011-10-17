@@ -65,6 +65,7 @@ Configuration TokenPlacer::getNextConfiguration(const Configuration & configurat
 			break;
 		}
 	}
+
 	int coordinateIndex = this->mapCoordinateOnIndex(Coordinate(*coordinate));
 	Coordinate movedCoordinate = this->mapIndexOnCoordinate(++coordinateIndex);
 
@@ -107,16 +108,17 @@ Configuration TokenPlacer::findBestConfiguration() {
 		double currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
-//		if (currentPrice > this->bestPrice) {
-//			// Delete previous configuration.
-//			delete this->bestConfiguration;d
-//
-//			// Save current solution as best solution.
-//			this->bestPrice = currentPrice;
-//			this->bestConfiguration = new Configuration(currentConfiguration);
-//		}
-	}
+		if (currentPrice > this->bestPrice) {
+			// Delete previous configuration.
+			delete this->bestConfiguration;
 
+			// Save current solution as best solution.
+			this->bestPrice = currentPrice;
+			this->bestConfiguration = new Configuration(currentConfiguration);
+		}
+	}
+	std::cout << "Max price: " << this->bestPrice << std::endl;
+	
 	return *this->bestConfiguration;
 }
 	

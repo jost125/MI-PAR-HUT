@@ -62,12 +62,13 @@ int main(int argc, char** argv) {
 	Matrix matrix = Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
-	// Debug output
-//	MatrixRenderer(&matrix).render();
 
 	TokenPlacer tp = TokenPlacer(matrix, maxTokens, pricePerToken);
-	tp.findBestConfiguration();
+	Configuration bestConfiguration = tp.findBestConfiguration();
 
+	// Debug output
+	MatrixRenderer(&matrix).render(& bestConfiguration);
+	
 	return 0;
 }
 
