@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 //	MatrixRenderer(&matrix).render();
 
 	TokenPlacer tp = TokenPlacer(matrix, maxTokens, pricePerToken);
-//	tp.findBestConfiguration();
+	tp.findBestConfiguration();
 
 	return 0;
 }

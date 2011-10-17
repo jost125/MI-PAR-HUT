@@ -1,8 +1,6 @@
 #include "TokenPlacer.h"
 #include <stdexcept>
-
 #include <iostream>
-using namespace std;
 
 TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken) : matrix(matrix) {
 	this->matrix = matrix;
@@ -33,10 +31,10 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 	Configuration currentConfiguration = Configuration(coordinateList);
 	this->stack.push_back(currentConfiguration);
 
-	while (this->existsNextConfiguration(currentConfiguration, numberOfTokens)) {
+	do {
 		currentConfiguration = this->getNextConfiguration(currentConfiguration, numberOfTokens);
 		this->stack.push_back(currentConfiguration);
-	}
+	} while (this->existsNextConfiguration(currentConfiguration, numberOfTokens));
 }
 
 bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
@@ -74,7 +72,7 @@ Configuration TokenPlacer::getNextConfiguration(const Configuration & configurat
 	coordinates.pop_back();
 	coordinates.push_back(movedCoordinate);
 
-	while (coordinates.size() == numberOfTokens) {
+	while (coordinates.size() <= numberOfTokens) {
 		coordinates.push_back(this->mapIndexOnCoordinate(++coordinateIndex));
 	}
 
@@ -98,6 +96,7 @@ int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) const {
 }
 
 Configuration TokenPlacer::findBestConfiguration() {
+	this->constructStack();
 	// While stack is not empty
 	while (!this->stack.empty()) {
 
@@ -105,19 +104,23 @@ Configuration TokenPlacer::findBestConfiguration() {
 		Configuration currentConfiguration = stack.back();
 		stack.pop_back();
 
+		std::cout << currentConfiguration << std::endl;
+
 		// Count price.
 		double currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
-		if (currentPrice > this->bestPrice) {
-			// Delete previous configuration.
-			delete this->bestConfiguration;
-
-			// Save current solution as best solution.
-			this->bestPrice = currentPrice;
-			this->bestConfiguration = new Configuration(currentConfiguration);
-		}
+//		if (currentPrice > this->bestPrice) {
+//			// Delete previous configuration.
+//			delete this->bestConfiguration;d
+//
+//			// Save current solution as best solution.
+//			this->bestPrice = currentPrice;
+//			this->bestConfiguration = new Configuration(currentConfiguration);
+//		}
 	}
+
+	return *this->bestConfiguration;
 }
 	
 double TokenPlacer::countPrice(const Configuration & configuration) const {
@@ -127,7 +130,6 @@ double TokenPlacer::countPrice(const Configuration & configuration) const {
 	for (int x = 0; x < this->matrix.getWidth(); x++) {
 		for (int y = 0; y < this->matrix.getHeight(); y++) {
 			// Find the shortest way from field to token.
-			cout << "-----------------------" << endl;
 			int minDistance = -1;
 			for (int k = 0; k < configuration.getCoordinates().size(); k++) {
 				int distance = configuration.getCoordinates().at(k).manhattanDistance(Coordinate(x, y));
@@ -140,12 +142,10 @@ double TokenPlacer::countPrice(const Configuration & configuration) const {
 					minDistance = distance;
 				}
 			}
-			cout << "MINIMAL DISTANCE: " << minDistance << endl;
 			// We should have minimal distance, so count the price.
 			if (minDistance != -1) {
 				Coordinate c = Coordinate(x, y);
 				totalPrice += (double)this->matrix.getValue(c) / (double)(1 + minDistance);
-				cout << "VALUE:" << this->matrix.getValue(c) << " | += " << (double)this->matrix.getValue(c) / (double)(1 + minDistance) << endl;
 			}
 		}
 	}
