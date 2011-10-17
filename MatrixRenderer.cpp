@@ -30,9 +30,6 @@ void MatrixRenderer::render(Configuration * config) {
 	int cellSize = 4;
 	// Print top border.
 	
-	cout << "Width: " << this->matrix->getWidth();
-	cout << "Height: " << this->matrix->getHeight();
-	
 	printLineDelimiter(this->matrix->getWidth(), cellSize, MatrixRenderer::FIRST_LINE);
 	
 	// Print matrix.
