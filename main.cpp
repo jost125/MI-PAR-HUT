@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 	int matrixHeight;
 	int maxTokens;
 	int pricePerToken;
-	
+
 	/**
 		Inputs.
 	 */
@@ -71,5 +71,3 @@ int main(int argc, char** argv) {
 	
 	return 0;
 }
-
-

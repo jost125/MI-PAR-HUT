@@ -34,6 +34,7 @@ private:
     void generateEachCombination(const int numberOfTokens);
     int mapCoordinateOnIndex(const Coordinate & coordinate) const;
     Coordinate mapIndexOnCoordinate(const int index) const;
+    void compareAndSaveSolution(double price, Configuration & currentConfiguration);
 };
 
 #endif	/* TOKENPLACER_H */

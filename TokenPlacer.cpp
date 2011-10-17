@@ -29,12 +29,32 @@ void TokenPlacer::generateEachCombination(const int numberOfTokens) {
 		coordinateList.push_back(Coordinate(this->mapIndexOnCoordinate(index)));
 	}
 	Configuration currentConfiguration = Configuration(coordinateList);
-	this->stack.push_back(currentConfiguration);
+	// Count price.
+	double currentPrice = this->countPrice(currentConfiguration);
+
+	// Compare with best solution.
+	compareAndSaveSolution(currentPrice, currentConfiguration);
+
 
 	do {
 		currentConfiguration = this->getNextConfiguration(currentConfiguration, numberOfTokens);
-		this->stack.push_back(currentConfiguration);
+		// Count price.
+		double currentPrice = this->countPrice(currentConfiguration);
+
+		// Compare with best solution.
+		compareAndSaveSolution(currentPrice, currentConfiguration);
 	} while (this->existsNextConfiguration(currentConfiguration, numberOfTokens));
+}
+
+void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentConfiguration) {
+	if (price > this->bestPrice) {
+		// Delete previous configuration.
+		delete this->bestConfiguration;
+
+		// Save current solution as best solution.
+		this->bestPrice = price;
+		this->bestConfiguration = new Configuration(currentConfiguration);
+	}
 }
 
 bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
@@ -96,26 +116,8 @@ int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) const {
 }
 
 Configuration TokenPlacer::findBestConfiguration() {
-	this->constructStack();
-	// While stack is not empty
-	while (!this->stack.empty()) {
-
-		// Pop configuration from stack.
-		Configuration currentConfiguration = stack.back();
-		stack.pop_back();
-
-		// Count price.
-		double currentPrice = this->countPrice(currentConfiguration);
-
-		// Compare with best solution.
-		if (currentPrice > this->bestPrice) {
-			// Delete previous configuration.
-			delete this->bestConfiguration;
-
-			// Save current solution as best solution.
-			this->bestPrice = currentPrice;
-			this->bestConfiguration = new Configuration(currentConfiguration);
-		}
+	for (int numberOfTokens = 1; numberOfTokens <= this->maxTokens; numberOfTokens++) {
+		this->generateEachCombination(numberOfTokens);
 	}
 	std::cout << "Max price: " << this->bestPrice << std::endl;
 	
