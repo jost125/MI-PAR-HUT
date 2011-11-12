@@ -46,7 +46,7 @@ bool Configuration::equals(const Configuration & compared) const {
 	return true;
 }
 
-std::ostream & operator << (std::ostream & os, Configuration & configuration) {
+std::ostream & operator << (std::ostream & os, const Configuration & configuration) {
 	std::vector<Coordinate> coordinates = configuration.getCoordinates();
 	for (int i = 0; i < coordinates.size(); i++) {
 		os << coordinates.at(i);

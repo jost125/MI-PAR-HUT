@@ -24,6 +24,6 @@ class Configuration {
         std::vector<Coordinate> coordinates;
 };
 
-std::ostream & operator << (std::ostream & os, Configuration & configuration);
+std::ostream & operator << (std::ostream & os, const Configuration & configuration);
 
 #endif	/* CONFIGURATION_H */
