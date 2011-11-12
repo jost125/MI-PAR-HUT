@@ -34,6 +34,10 @@ std::vector<Coordinate> Configuration::getCoordinates() const {
 }
 
 bool Configuration::equals(const Configuration & compared) const {
+	if (coordinates.size() != compared.coordinates.size()) {
+		return false;
+	}
+
 	for (int i = 0; i < coordinates.size(); i++) {
 		if (!coordinates.at(i).equals(compared.coordinates.at(i))) {
 			return false;
