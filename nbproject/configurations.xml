@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>Configuration.h</itemPath>
       <itemPath>Coordinate.h</itemPath>
+      <itemPath>Debug.h</itemPath>
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
       <itemPath>MatrixRenderer.h</itemPath>
@@ -51,6 +52,9 @@
         </cTool>
         <ccTool>
           <architecture>2</architecture>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
         </ccTool>
       </compileType>
     </conf>

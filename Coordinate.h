@@ -18,6 +18,8 @@ class Coordinate {
         int getX() const;
         int getY() const;
         int manhattanDistance(Coordinate coordinate) const;
+        int toIndex(const int matrixWidth) const;
+        static Coordinate createCoordinateFromIndex(const int index, const int matrixWidth);
         bool equals(const Coordinate & compared) const;
     private:
         int x;

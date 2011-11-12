@@ -23,9 +23,7 @@ int main(int argc, char** argv) {
 	int maxTokens;
 	int pricePerToken;
 
-	/**
-		Inputs.
-	 */
+	// Inputs.
 	
 	cout << "Enter height of matrix:" << endl;
 	cin >> matrixHeight;
@@ -62,9 +60,8 @@ int main(int argc, char** argv) {
 	Matrix matrix = Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
-
 	TokenPlacer tp = TokenPlacer(matrix, maxTokens, pricePerToken);
-	Configuration bestConfiguration = tp.findBestConfiguration();
+	Configuration bestConfiguration = tp.findBestConfiguration(tp.createFirstConfiguration(1), tp.createLastConfiguration(maxTokens));
 
 	// Debug output
 	MatrixRenderer(&matrix).render(& bestConfiguration);

@@ -1,6 +1,7 @@
 #include "TokenPlacer.h"
 #include <stdexcept>
 #include <iostream>
+#include "Debug.h"
 
 TokenPlacer::TokenPlacer(const Matrix & matrix, const int maxTokens, const int pricePerToken) : matrix(matrix) {
 	this->matrix = matrix;
@@ -21,33 +22,29 @@ TokenPlacer::~TokenPlacer() {
 	delete this->bestConfiguration;
 }
 
-void TokenPlacer::constructStack() {
-	for (int numberOfTokens = 1; numberOfTokens <= this->maxTokens; numberOfTokens++) {
-		this->generateEachCombination(numberOfTokens);
-	}
-}
+void TokenPlacer::generateEachCombination(const Configuration & start, const Configuration & end) {
+	// Current is starting configuration
+	Configuration currentConfiguration = Configuration(start);
 
-void TokenPlacer::generateEachCombination(const int numberOfTokens) {
-	std::vector<Coordinate> coordinateList = std::vector<Coordinate>();
-	for (int index = 0; index < numberOfTokens; index++) {
-		coordinateList.push_back(Coordinate(this->mapIndexOnCoordinate(index)));
-	}
-	Configuration currentConfiguration = Configuration(coordinateList);
+	TRACE(end);
+	TRACE(currentConfiguration);
+
 	// Count price.
 	double currentPrice = this->countPrice(currentConfiguration);
 
 	// Compare with best solution.
 	compareAndSaveSolution(currentPrice, currentConfiguration);
 
-
 	do {
-		currentConfiguration = this->getNextConfiguration(currentConfiguration, numberOfTokens);
+		currentConfiguration = this->getNextConfiguration(currentConfiguration);
+		TRACE(currentConfiguration);
+
 		// Count price.
 		double currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
 		compareAndSaveSolution(currentPrice, currentConfiguration);
-	} while (this->existsNextConfiguration(currentConfiguration, numberOfTokens));
+	} while (this->existsNextConfiguration(currentConfiguration, end));
 }
 
 void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentConfiguration) {
@@ -61,26 +58,55 @@ void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentCo
 	}
 }
 
-bool TokenPlacer::existsNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
+bool TokenPlacer::existsNextConfiguration(const Configuration & configuration,const Configuration & end) const {
+	return !configuration.equals(end);
+}
+
+bool TokenPlacer::isLast(const Configuration & configuration, const int & numberOfTokens) const {
 	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
 	for (int i = 0; i < numberOfTokens; i++) {
-		Coordinate c = this->mapIndexOnCoordinate(position);
+		Coordinate c = Coordinate::createCoordinateFromIndex(position, this->matrix.getWidth());
 		if (!configuration.contains(c)) {
-			return true;
+			return false;
 		}
 		position--;
 	}
-	return false;
+	return true;
 }
 
-Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration, const int & numberOfTokens) const {
-	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
-	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+Configuration TokenPlacer::createFirstConfiguration(const int & numberOfTokens) const {
+	std::vector<Coordinate> coordinates = std::vector<Coordinate>();
+	for (int i = 0; i < numberOfTokens; i++) {
+		coordinates.push_back(Coordinate::createCoordinateFromIndex(i, this->matrix.getWidth()));
+	}
 
+	return Configuration(coordinates);
+}
+
+Configuration TokenPlacer::createLastConfiguration(const int & numberOfTokens) const {
+	std::vector<Coordinate> coordinates = std::vector<Coordinate>();
+	int lastPosition = this->matrix.getWidth() * this->matrix.getHeight() - 1;
+	for (int i = numberOfTokens - 1; i >= 0; i--) {
+		coordinates.push_back(Coordinate::createCoordinateFromIndex(lastPosition - i, this->matrix.getWidth()));
+	}
+
+	return Configuration(coordinates);
+}
+
+Configuration TokenPlacer::getNextConfiguration(const Configuration & configuration) const {
+	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+	int numberOfTokens = coordinates.size();
+
+	if (this->isLast(configuration, numberOfTokens)) {
+		return this->createFirstConfiguration(numberOfTokens + 1);
+	}
+
+	int position = this->matrix.getHeight() * this->matrix.getWidth() - 1;
+	
 	Coordinate * coordinate;
 	for (int i = 0; i < numberOfTokens; i++) {
 		coordinate = &coordinates.back();
-		if (position == this->mapCoordinateOnIndex(*coordinate)) {
+		if (position == coordinate->toIndex(this->matrix.getWidth())) {
 			// Look further.
 			position--;
 			coordinates.pop_back();
@@ -90,39 +116,21 @@ Configuration TokenPlacer::getNextConfiguration(const Configuration & configurat
 		}
 	}
 
-	int coordinateIndex = this->mapCoordinateOnIndex(Coordinate(*coordinate));
-	Coordinate movedCoordinate = this->mapIndexOnCoordinate(++coordinateIndex);
+	int coordinateIndex = coordinate->toIndex(this->matrix.getWidth());
+	Coordinate movedCoordinate = Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrix.getWidth());
 
 	coordinates.pop_back();
 	coordinates.push_back(movedCoordinate);
 
 	while (coordinates.size() < numberOfTokens) {
-		coordinates.push_back(this->mapIndexOnCoordinate(++coordinateIndex));
+		coordinates.push_back(Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrix.getWidth()));
 	}
 
 	return Configuration(coordinates);
 }
 
-Coordinate TokenPlacer::mapIndexOnCoordinate(const int index) const {
-	if (index >= this->matrix.getHeight() * this->matrix.getWidth()) {
-		throw std::runtime_error("Index is out of range.");
-	}
-	int x = index % this->matrix.getWidth();
-	int y = index / this->matrix.getWidth();
-	return Coordinate(x, y);
-}
-
-int TokenPlacer::mapCoordinateOnIndex(const Coordinate & coordinate) const {
-	if (!this->matrix.isCoordinateInside(coordinate)) {
-		throw std::runtime_error("Coordinates are out of matrix.");
-	}
-	return (coordinate.getY() * this->matrix.getWidth()) + coordinate.getX();
-}
-
-Configuration TokenPlacer::findBestConfiguration() {
-	for (int numberOfTokens = 1; numberOfTokens <= this->maxTokens; numberOfTokens++) {
-		this->generateEachCombination(numberOfTokens);
-	}
+Configuration TokenPlacer::findBestConfiguration(const Configuration & start, const Configuration & end) {
+	this->generateEachCombination(start, end);
 	std::cout << "Max price: " << this->bestPrice << std::endl;
 	
 	return *this->bestConfiguration;

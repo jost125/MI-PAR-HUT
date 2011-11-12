@@ -39,6 +39,13 @@ int Coordinate::manhattanDistance(Coordinate coordinate) const {
 	return abs(this->getX() - coordinate.getX()) + abs(this->getY() - coordinate.getY());
 }
 
+int Coordinate::toIndex(const int matrixWidth) const {
+	return (this->getY() * matrixWidth) + this->getX();
+}
+
 bool Coordinate::equals(const Coordinate & compared) const {
 	return this->x == compared.x && this->y == compared.y;
+}
+Coordinate Coordinate::createCoordinateFromIndex(const int index, const int matrixWidth) {
+	return Coordinate(index % matrixWidth, index / matrixWidth);
 }
