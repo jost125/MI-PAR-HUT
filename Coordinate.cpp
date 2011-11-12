@@ -30,7 +30,7 @@ int Coordinate::getY() const {
 	return this->y;
 }
 
-std::ostream & operator << (std::ostream &os, Coordinate & coordinate) {
+std::ostream & operator << (std::ostream &os, const Coordinate & coordinate) {
 	os << '[' << coordinate.getX() << ',' << coordinate.getY() << ']';
 	return os;
 }

@@ -24,7 +24,7 @@ class Coordinate {
         int y;
 };
 
-std::ostream & operator << (std::ostream &os, Coordinate & coordinate);
+std::ostream & operator << (std::ostream &os, const Coordinate & coordinate);
 
 #endif	/* COORDINATE_H */
 
