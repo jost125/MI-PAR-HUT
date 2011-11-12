@@ -18,7 +18,7 @@ class Coordinate {
         int getX() const;
         int getY() const;
         int manhattanDistance(Coordinate coordinate) const;
-        bool equals(const Coordinate & compared);
+        bool equals(const Coordinate & compared) const;
     private:
         int x;
         int y;

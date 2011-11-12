@@ -39,6 +39,6 @@ int Coordinate::manhattanDistance(Coordinate coordinate) const {
 	return abs(this->getX() - coordinate.getX()) + abs(this->getY() - coordinate.getY());
 }
 
-bool Coordinate::equals(const Coordinate & compared) {
+bool Coordinate::equals(const Coordinate & compared) const {
 	return this->x == compared.x && this->y == compared.y;
 }
