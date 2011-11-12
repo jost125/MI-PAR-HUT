@@ -33,6 +33,15 @@ std::vector<Coordinate> Configuration::getCoordinates() const {
 	return this->coordinates;
 }
 
+bool Configuration::equals(const Configuration & compared) const {
+	for (int i = 0; i < coordinates.size(); i++) {
+		if (!coordinates.at(i).equals(compared.coordinates.at(i))) {
+			return false;
+		}
+	}
+	return true;
+}
+
 std::ostream & operator << (std::ostream & os, Configuration & configuration) {
 	std::vector<Coordinate> coordinates = configuration.getCoordinates();
 	for (int i = 0; i < coordinates.size(); i++) {

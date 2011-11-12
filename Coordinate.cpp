@@ -38,3 +38,7 @@ std::ostream & operator << (std::ostream &os, Coordinate & coordinate) {
 int Coordinate::manhattanDistance(Coordinate coordinate) const {
 	return abs(this->getX() - coordinate.getX()) + abs(this->getY() - coordinate.getY());
 }
+
+bool Coordinate::equals(const Coordinate & compared) {
+	return this->x == compared.x && this->y == compared.y;
+}
