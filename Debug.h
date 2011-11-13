@@ -5,6 +5,8 @@
  * Created on November 12, 2011, 4:33 PM
  */
 
+#include <iostream>
+
 #ifndef DEBUG_H
 #define	DEBUG_H
 
