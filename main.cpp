@@ -58,10 +58,14 @@ int main(int argc, char** argv) {
 	Matrix matrix = Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
-	ConfigurationFactory configurationFactory = ConfigurationFactory(matrix.getWidth(), matrix.getHeight());
+	ConfigurationFactory factory = ConfigurationFactory(matrix.getWidth(), matrix.getHeight());
 
-	TokenPlacer tp = TokenPlacer(matrix, configurationFactory, maxTokens, pricePerToken);
-	Configuration bestConfiguration = tp.findBestConfiguration(configurationFactory.createFirstConfiguration(1), configurationFactory.createLastConfiguration(maxTokens));
+	TokenPlacer tp = TokenPlacer(matrix, factory, maxTokens, pricePerToken);
+	
+	Configuration bestConfiguration = tp.findBestConfiguration(
+		factory.createFirstConfiguration(1),
+		factory.createLastConfiguration(maxTokens)
+	);
 
 	// Debug output
 	MatrixRenderer(&matrix).render(& bestConfiguration);
