@@ -37,6 +37,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/TokenPlacer.o \
 	${OBJECTDIR}/Matrix.o \
 	${OBJECTDIR}/Configuration.o \
+	${OBJECTDIR}/InputReader.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
@@ -81,6 +82,11 @@ ${OBJECTDIR}/Configuration.o: Configuration.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Configuration.o Configuration.cpp
+
+${OBJECTDIR}/InputReader.o: InputReader.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/InputReader.o InputReader.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}

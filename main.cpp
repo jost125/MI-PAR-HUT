@@ -11,50 +11,45 @@
 #include "MatrixRenderer.h"
 #include "MatrixRandomGenerator.h"
 #include "TokenPlacer.h"
+#include "InputReader.h"
 
 using namespace std;
 
 /*
  * 
  */
-int main(int argc, char** argv) { 
-	int matrixWidth;
-	int matrixHeight;
-	int maxTokens;
-	int pricePerToken;
+int main(int argc, char** argv) {
+
+	InputReader input = InputReader();
+
+	int matrixWidth, matrixHeight, maxTokens, pricePerToken, maxAllowedTokens;
 
 	// Inputs.
-	
-	cout << "Enter height of matrix:" << endl;
-	cin >> matrixHeight;
-	
-	if (matrixHeight < 3) {
-		cerr << "Error: Height of matrix must not be less than 3." << endl;
+	// Width.
+	if ((matrixWidth = input.readWidth()) < 3) {
+		cerr << "Error: Width of matrix must not be less than 3.";
 		return -1;
 	}
-		
-	cout << "Enter width of matrix:" << endl;
-	cin >> matrixWidth;
-	
-	if (matrixWidth < 3) {
-		cerr << "Error: Width of matrix must not be less than 3." << endl;
-		return -2;
+
+	// Height.
+	if ((matrixHeight = input.readHeight()) < 3) {
+		cerr << "Error: Height of matrix must not be less than 3.";
+		return -1;
 	}
-	
-	cout << "Enter number of maximal tokens:" << endl;
-	cin >> maxTokens;
-	
-	if (maxTokens < 1 || maxTokens > ((matrixHeight * matrixWidth ) / 2)) {
-		cerr << "Error: Maximum of tokens must be between 1 and " << (matrixHeight * matrixWidth ) / 2 << "." << endl;
-		return -3;
+
+	// Max tokens
+	maxTokens = input.readMaxTokens();
+	maxAllowedTokens = (matrixHeight * matrixWidth) / 2;
+	if (maxTokens < 1 || maxTokens > maxAllowedTokens) {
+		cerr << "Error: Maximum of tokens must be between 1 and " << maxAllowedTokens << ".";
+		return -1;
 	}
-	
-	cout << "Enter price for token:" << endl;
-	cin >> pricePerToken;
-	
+
+	// Price per token
+	pricePerToken = input.readPricePerToken();
 	if (pricePerToken < 1 || pricePerToken > 100) {
-		cerr << "Error: Price for token must be between 1 and 100." << endl;
-		return -4;
+		std::cerr << "Error: Price for token must be between 1 and 100." << std::endl;
+		return -1;
 	}
 	
 	Matrix matrix = Matrix(matrixWidth, matrixHeight);
