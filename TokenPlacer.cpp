@@ -26,25 +26,21 @@ void TokenPlacer::generateEachCombination(const Configuration & start, const Con
 	// Current is starting configuration
 	Configuration currentConfiguration = Configuration(start);
 
-	TRACE(end);
-	TRACE(currentConfiguration);
-
 	// Count price.
 	double currentPrice = this->countPrice(currentConfiguration);
 
 	// Compare with best solution.
-	compareAndSaveSolution(currentPrice, currentConfiguration);
+	this->compareAndSaveSolution(currentPrice, currentConfiguration);
 
 	do {
 		currentConfiguration = this->getNextConfiguration(currentConfiguration);
-		TRACE(currentConfiguration);
 
 		// Count price.
 		double currentPrice = this->countPrice(currentConfiguration);
 
 		// Compare with best solution.
-		compareAndSaveSolution(currentPrice, currentConfiguration);
-	} while (this->existsNextConfiguration(currentConfiguration, end));
+		this->compareAndSaveSolution(currentPrice, currentConfiguration);
+	} while (!currentConfiguration.equals(end));
 }
 
 void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentConfiguration) {
@@ -56,10 +52,6 @@ void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentCo
 		this->bestPrice = price;
 		this->bestConfiguration = new Configuration(currentConfiguration);
 	}
-}
-
-bool TokenPlacer::existsNextConfiguration(const Configuration & configuration,const Configuration & end) const {
-	return !configuration.equals(end);
 }
 
 bool TokenPlacer::isLast(const Configuration & configuration, const int & numberOfTokens) const {

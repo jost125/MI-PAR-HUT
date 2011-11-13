@@ -30,7 +30,6 @@ private:
     Configuration * bestConfiguration;
     std::vector<Configuration> stack;
 
-    bool existsNextConfiguration(const Configuration & configuration, const Configuration & end) const;
     bool isLast(const Configuration & configuration, const int & numberOfTokens) const;
     Configuration getNextConfiguration(const Configuration & configuration) const;
     void generateEachCombination(const Configuration & start, const Configuration & end);
