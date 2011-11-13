@@ -12,6 +12,9 @@
 #include "MatrixRandomGenerator.h"
 #include "TokenPlacer.h"
 #include "InputReader.h"
+#include "mpi.h"
+#include "ConfigurationFactory.h"
+#include "Debug.h"
 
 using namespace std;
 
@@ -55,8 +58,10 @@ int main(int argc, char** argv) {
 	Matrix matrix = Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(&matrix).fillRandom(1, 100);
 
-	TokenPlacer tp = TokenPlacer(matrix, maxTokens, pricePerToken);
-	Configuration bestConfiguration = tp.findBestConfiguration(tp.createFirstConfiguration(1), tp.createLastConfiguration(maxTokens));
+	ConfigurationFactory configurationFactory = ConfigurationFactory(matrix.getWidth(), matrix.getHeight());
+
+	TokenPlacer tp = TokenPlacer(matrix, configurationFactory, maxTokens, pricePerToken);
+	Configuration bestConfiguration = tp.findBestConfiguration(configurationFactory.createFirstConfiguration(1), configurationFactory.createLastConfiguration(maxTokens));
 
 	// Debug output
 	MatrixRenderer(&matrix).render(& bestConfiguration);

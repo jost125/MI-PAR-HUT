@@ -41,6 +41,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
+	${OBJECTDIR}/ConfigurationFactory.o \
+	${OBJECTDIR}/ConfigurationInterval.o \
 	${OBJECTDIR}/MatrixRandomGenerator.o
 
 
@@ -102,6 +104,16 @@ ${OBJECTDIR}/Coordinate.o: Coordinate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/Coordinate.o Coordinate.cpp
+
+${OBJECTDIR}/ConfigurationFactory.o: ConfigurationFactory.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/ConfigurationFactory.o ConfigurationFactory.cpp
+
+${OBJECTDIR}/ConfigurationInterval.o: ConfigurationInterval.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/ConfigurationInterval.o ConfigurationInterval.cpp
 
 ${OBJECTDIR}/MatrixRandomGenerator.o: MatrixRandomGenerator.cpp 
 	${MKDIR} -p ${OBJECTDIR}

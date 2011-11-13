@@ -5,6 +5,8 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>Configuration.h</itemPath>
+      <itemPath>ConfigurationFactory.h</itemPath>
+      <itemPath>ConfigurationInterval.h</itemPath>
       <itemPath>Coordinate.h</itemPath>
       <itemPath>Debug.h</itemPath>
       <itemPath>InputReader.h</itemPath>
@@ -17,6 +19,8 @@
                    displayName="Resource Files"
                    projectFiles="true">
       <itemPath>Configuration.cpp</itemPath>
+      <itemPath>ConfigurationFactory.cpp</itemPath>
+      <itemPath>ConfigurationInterval.cpp</itemPath>
       <itemPath>Coordinate.cpp</itemPath>
       <itemPath>InputReader.cpp</itemPath>
       <itemPath>Matrix.cpp</itemPath>
