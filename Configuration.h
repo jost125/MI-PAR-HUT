@@ -20,6 +20,7 @@ class Configuration {
         bool contains(const Coordinate & coordinate) const;
         std::vector<Coordinate> getCoordinates() const;
         bool equals(const Configuration & compared) const;
+        int compare(const Configuration & compared, int matrixWidth) const;
     private:
         std::vector<Coordinate> coordinates;
 };

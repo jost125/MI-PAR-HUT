@@ -46,6 +46,7 @@ int Coordinate::toIndex(const int matrixWidth) const {
 bool Coordinate::equals(const Coordinate & compared) const {
 	return this->x == compared.x && this->y == compared.y;
 }
+
 Coordinate Coordinate::createCoordinateFromIndex(const int index, const int matrixWidth) {
 	return Coordinate(index % matrixWidth, index / matrixWidth);
 }

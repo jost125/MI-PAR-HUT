@@ -46,6 +46,25 @@ bool Configuration::equals(const Configuration & compared) const {
 	return true;
 }
 
+int Configuration::compare(const Configuration & compared, int matrixWidth) const {
+	if (coordinates.size() > compared.coordinates.size()) {
+		return 1;
+	} else if (coordinates.size() < compared.coordinates.size()) {
+		return -1;
+	} else {
+		for (int i = 0; i < coordinates.size(); i++) {
+			if (coordinates.at(i).toIndex(matrixWidth) > compared.coordinates.at(i).toIndex(matrixWidth)) {
+				return 1;
+			} else if (coordinates.at(i).toIndex(matrixWidth) < compared.coordinates.at(i).toIndex(matrixWidth)) {
+				return -1;
+			} else {
+				// continue;
+			}
+		}
+	}
+	return 0;
+}
+
 std::ostream & operator << (std::ostream & os, const Configuration & configuration) {
 	std::vector<Coordinate> coordinates = configuration.getCoordinates();
 	for (int i = 0; i < coordinates.size(); i++) {
