@@ -20,10 +20,10 @@ void Matrix::initFields() {
 	}
 }
 
-Matrix::Matrix(const Matrix & matrix) {
-	this->height = matrix.height;
-	this->width = matrix.width;
-	this->fields = matrix.fields;
+Matrix::Matrix(const Matrix & orig) {
+	this->height = orig.height;
+	this->width = orig.width;
+	this->fields = orig.fields;
 }
 
 Matrix::~Matrix() {

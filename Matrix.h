@@ -18,7 +18,7 @@ class Matrix {
             std::vector<std::vector<int> > fields;
         public:
             Matrix(int const width, int const height);
-            Matrix(const Matrix & matrix);
+            Matrix(const Matrix & orig);
             virtual ~Matrix();
             void setValue(const Coordinate & coordinate, int const value);
             int getValue(const Coordinate & coordinate) const;
