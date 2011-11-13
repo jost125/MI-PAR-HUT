@@ -52,6 +52,7 @@
         </cTool>
         <ccTool>
           <architecture>2</architecture>
+          <commandlineTool>mpiCC</commandlineTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
