@@ -16,12 +16,16 @@ public:
     ConfigurationInterval(const Configuration & start, const Configuration & end);
     ConfigurationInterval(const ConfigurationInterval& orig);
     virtual ~ConfigurationInterval();
+    ConfigurationInterval split(const ConfigurationFactory & factory);
+    bool isSplitable(const ConfigurationFactory & factory);
 
     Configuration getStart() const;
     Configuration getEnd() const;
 private:
     Configuration start;
     Configuration end;
+
+    Configuration findCenter(const ConfigurationFactory & factory) const;
 };
 
 std::ostream & operator << (std::ostream &os, const ConfigurationInterval & interval);
