@@ -94,17 +94,21 @@ int ConfigurationFactory::getLastMatrixPosition() const {
 	return this->matrixWidth * this->matrixHeight - 1;
 }
 
-Configuration ConfigurationFactory::getBetween(const Configuration& first, const Configuration& second) {
-	int coordinatesDifference = second.getCoordinates().size() - first.getCoordinates().size();
-	if (coordinatesDifference > 0) {
-		int firstBetweenCoordinateIndex = (int)(second.getCoordinates().front().toIndex(this->matrixWidth) / 2);
-		std::vector<Coordinate> betweenList = std::vector<Coordinate>();
-		for (int i = second.getCoordinates().size(); i > 0; i--) {
-			betweenList.push_back(Coordinate::createCoordinateFromIndex(firstBetweenCoordinateIndex + i, this->matrixWidth));
-		}
-		
-		return Configuration(betweenList);
+int ConfigurationFactory::getMatrixWidth() const {
+	return this->matrixWidth;
+}
+
+int ConfigurationFactory::getMatrixHeight() const {
+	return this->matrixHeight;
+}
+
+Configuration ConfigurationFactory::createFromIndexes(int * indexes, const int size) const {
+
+	std::vector<Coordinate> coordinates = std::vector<Coordinate>();
+
+	for (int i = 0; i < size; i++) {
+		coordinates.push_back(Coordinate::createCoordinateFromIndex(indexes[i], matrixWidth));
 	}
-	
-	return first;
+
+	return Configuration(coordinates);
 }

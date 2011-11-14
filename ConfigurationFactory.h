@@ -19,7 +19,10 @@ public:
     Configuration createLastConfiguration(const int & numberOfTokens) const;
     Configuration getNextConfiguration(const Configuration & configuration) const;
     bool isLast(const Configuration & configuration) const;
-    Configuration getBetween(const Configuration & first, const Configuration & second);
+    Configuration createFromIndexes(int * indexes, const int size) const;
+
+    int getMatrixWidth() const;
+    int getMatrixHeight() const;
 private:
     int matrixWidth;
     int matrixHeight;
