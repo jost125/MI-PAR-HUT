@@ -42,8 +42,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
 	${OBJECTDIR}/ConfigurationFactory.o \
-	${OBJECTDIR}/ConfigurationInterval.o \
-	${OBJECTDIR}/MatrixRandomGenerator.o
+	${OBJECTDIR}/MatrixRandomGenerator.o \
+	${OBJECTDIR}/ConfigurationInterval.o
 
 
 # C Compiler Flags
@@ -110,15 +110,15 @@ ${OBJECTDIR}/ConfigurationFactory.o: ConfigurationFactory.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/ConfigurationFactory.o ConfigurationFactory.cpp
 
-${OBJECTDIR}/ConfigurationInterval.o: ConfigurationInterval.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/ConfigurationInterval.o ConfigurationInterval.cpp
-
 ${OBJECTDIR}/MatrixRandomGenerator.o: MatrixRandomGenerator.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/MatrixRandomGenerator.o MatrixRandomGenerator.cpp
+
+${OBJECTDIR}/ConfigurationInterval.o: ConfigurationInterval.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/ConfigurationInterval.o ConfigurationInterval.cpp
 
 # Subprojects
 .build-subprojects:
