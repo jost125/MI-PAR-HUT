@@ -6,6 +6,7 @@
  */
 
 #include "Configuration.h"
+#include "ConfigurationFactory.h"
 
 #ifndef CONFIGURATIONINTERVAL_H
 #define	CONFIGURATIONINTERVAL_H
@@ -15,6 +16,9 @@ public:
     ConfigurationInterval(const Configuration & start, const Configuration & end);
     ConfigurationInterval(const ConfigurationInterval& orig);
     virtual ~ConfigurationInterval();
+
+    Configuration getStart() const;
+    Configuration getEnd() const;
 private:
     Configuration start;
     Configuration end;

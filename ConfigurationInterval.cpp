@@ -6,6 +6,9 @@
  */
 
 #include "ConfigurationInterval.h"
+#include "ConfigurationFactory.h"
+#include "Debug.h"
+#include <math.h>
 
 ConfigurationInterval::ConfigurationInterval(const Configuration & start, const Configuration & end) : start(start), end(end) {
 	this->start = start;
@@ -15,6 +18,14 @@ ConfigurationInterval::ConfigurationInterval(const Configuration & start, const 
 ConfigurationInterval::ConfigurationInterval(const ConfigurationInterval& orig) : start(orig.start), end(orig.end) {
 	this->start = orig.start;
 	this->end = orig.end;
+}
+
+Configuration ConfigurationInterval::getStart() const {
+	return this->start;
+}
+
+Configuration ConfigurationInterval::getEnd() const {
+	return this->end;
 }
 
 ConfigurationInterval::~ConfigurationInterval() {
