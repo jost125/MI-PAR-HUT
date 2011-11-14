@@ -24,5 +24,7 @@ private:
     Configuration end;
 };
 
+std::ostream & operator << (std::ostream &os, const ConfigurationInterval & interval);
+
 #endif	/* CONFIGURATIONINTERVAL_H */
 

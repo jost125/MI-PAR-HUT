@@ -30,3 +30,8 @@ Configuration ConfigurationInterval::getEnd() const {
 
 ConfigurationInterval::~ConfigurationInterval() {
 }
+
+std::ostream & operator << (std::ostream &os, const ConfigurationInterval & interval) {
+	os << '(' << interval.getStart() << '-' << interval.getEnd() << ')';
+	return os;
+}
