@@ -21,6 +21,7 @@ class Configuration {
         const std::vector<Coordinate> & getCoordinates() const;
         bool equals(const Configuration & compared) const;
         int compare(const Configuration & compared, int matrixWidth) const;
+        int setCoordinate(const int index, const Coordinate & coordinate);
     private:
         std::vector<Coordinate> coordinates;
 };

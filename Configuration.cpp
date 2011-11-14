@@ -29,6 +29,10 @@ bool Configuration::contains(const Coordinate & coordinate) const {
 	return false;
 }
 
+int Configuration::setCoordinate(const int index, const Coordinate & coordinate) {
+	this->coordinates[index] = coordinate;
+}
+
 const std::vector<Coordinate> & Configuration::getCoordinates() const {
 	return this->coordinates;
 }
