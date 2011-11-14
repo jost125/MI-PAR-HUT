@@ -1,7 +1,9 @@
 
 #include "Matrix.h"
 #include "Coordinate.h"
+#include "Debug.h"
 #include <stdexcept>
+#include <iostream>
 
 Matrix::Matrix(const int width, const int height) {
 	this->width = width;
@@ -10,23 +12,60 @@ Matrix::Matrix(const int width, const int height) {
 }
 
 void Matrix::initFields() {
-	this->fields = std::vector<std::vector<int> >();
+	this->fields = new int * [this->width];
 	for (int x = 0; x < this->width; x++) {
-		std::vector<int> row = std::vector<int>();
+		this->fields[x] = new int[this->height];
+	}
+}
+
+int ** Matrix::getFields() const {
+	return this->fields;
+}
+
+void Matrix::setFields(int** fields) const {
+	for (int x = 0; x < this->width; x++) {
 		for (int y = 0; y < this->height; y++) {
-			row.push_back(0);
+			this->fields[x][y] = fields[x][y];
 		}
-		this->fields.push_back(row);
 	}
 }
 
 Matrix::Matrix(const Matrix & orig) {
 	this->height = orig.height;
 	this->width = orig.width;
-	this->fields = orig.fields;
+	
+	this->fields = new int * [this->width];
+	for (int x = 0; x < this->width; x++) {
+		this->fields[x] = new int[this->height];
+		for (int y = 0; y < this->height; y++) {
+			this->fields[x][y] = orig.fields[x][y];
+		}
+	}
+}
+
+Matrix & Matrix::operator= (const Matrix & other) {
+	if (this != &other) {
+		this->height = other.height;
+		this->width = other.width;
+		
+		this->fields = new int * [this->width];
+		for (int x = 0; x < this->width; x++) {
+			this->fields[x] = new int[this->height];
+			for (int y = 0; y < this->height; y++) {
+				this->fields[x][y] = other.fields[x][y];
+			}
+		}
+	}
+	
+	return * this;
 }
 
 Matrix::~Matrix() {
+	for (int x = 0; x < this->width; x++) {
+		delete [] this->fields[x];
+	}	
+	delete [] this->fields;
+	this->fields = NULL;
 }
 
 int Matrix::getValue(const Coordinate & coordinate) const {
