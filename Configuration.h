@@ -18,7 +18,7 @@ class Configuration {
         Configuration(const Configuration & orig);
         virtual ~Configuration();
         bool contains(const Coordinate & coordinate) const;
-        std::vector<Coordinate> getCoordinates() const;
+        const std::vector<Coordinate> & getCoordinates() const;
         bool equals(const Configuration & compared) const;
         int compare(const Configuration & compared, int matrixWidth) const;
     private:
