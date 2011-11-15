@@ -15,7 +15,7 @@ void Matrix::initFields() {
 	this->fields = new int [this->width * this->height];
 }
 
-int * Matrix::getFields() const {
+int * Matrix::getFieldsPointer() const {
 	return this->fields;
 }
 

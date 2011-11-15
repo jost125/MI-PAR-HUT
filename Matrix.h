@@ -27,7 +27,7 @@ class Matrix {
             int getHeight() const;
             bool isCoordinateInside(const Coordinate & coordinate) const;
             void initFields();
-            int * getFields() const;
+            int * getFieldsPointer() const;
             void setFields(int * fields) const;
 };
 
