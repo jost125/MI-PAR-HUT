@@ -35,6 +35,12 @@ Application::~Application() {
 	if (this->matrix != NULL) {
 		delete this->matrix;
 	}
+	if (this->interval != NULL) {
+		delete this->interval;
+	}
+	if (this->factory != NULL) {
+		delete this->factory;
+	}
 }
 
 void Application::reallocateBuffer(int size) {
@@ -47,6 +53,7 @@ void Application::init(int * argc, char *** argv) {
 	this->bufferSize = 1;
 	this->buffer = new char[1];
 	this->matrix = NULL;
+	this->interval = NULL;
 
 	MPI_Init(argc, argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &this->rank);

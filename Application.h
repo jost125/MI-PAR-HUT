@@ -7,6 +7,8 @@
 
 #include "mpi.h"
 #include "Matrix.h"
+#include "ConfigurationFactory.h"
+#include "ConfigurationInterval.h"
 
 #ifndef APP_H
 #define	APP_H
@@ -27,6 +29,7 @@ private:
     void createMatrix();
 
     void reallocateBuffer(int size);
+    ConfigurationFactory * getFactory();
 
     MPI_Request request;
     MPI_Status status;
@@ -43,6 +46,9 @@ private:
     int pricePerToken;
 
     Matrix * matrix;
+
+    ConfigurationInterval * interval;
+    ConfigurationFactory * factory;
 };
 
 #endif	/* APP_H */
