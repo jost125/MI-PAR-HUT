@@ -34,6 +34,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/Application.o \
 	${OBJECTDIR}/TokenPlacer.o \
 	${OBJECTDIR}/Matrix.o \
 	${OBJECTDIR}/Configuration.o \
@@ -41,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
+	${OBJECTDIR}/Tags.o \
 	${OBJECTDIR}/ConfigurationFactory.o \
 	${OBJECTDIR}/MatrixRandomGenerator.o \
 	${OBJECTDIR}/ConfigurationInterval.o
@@ -69,6 +71,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/hut: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/hut ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/Application.o: Application.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/Application.o Application.cpp
 
 ${OBJECTDIR}/TokenPlacer.o: TokenPlacer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -104,6 +111,11 @@ ${OBJECTDIR}/Coordinate.o: Coordinate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/Coordinate.o Coordinate.cpp
+
+${OBJECTDIR}/Tags.o: Tags.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -MMD -MP -MF $@.d -o ${OBJECTDIR}/Tags.o Tags.cpp
 
 ${OBJECTDIR}/ConfigurationFactory.o: ConfigurationFactory.cpp 
 	${MKDIR} -p ${OBJECTDIR}
