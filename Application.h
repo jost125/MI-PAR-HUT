@@ -26,6 +26,7 @@ private:
     void receiveInputs();
 
     void sendMatrix();
+    void receiveMatrix();
 
     void sendInitIntervals();
     void sendInterval(ConfigurationInterval interval, int rank);
@@ -36,14 +37,18 @@ private:
     void generateMatrix();
     void createMatrix();
 
-    void reallocateBuffer(int size);
+    void reallocateSendBuffer(int size);
+    void reallocateReceiveBuffer(int size);
     ConfigurationFactory * getFactory();
 
     MPI_Request request;
     MPI_Status status;
 
-    char * buffer;
-    int bufferSize;
+    char * sendBuffer;
+    int sendBufferSize;
+
+    char * receiveBuffer;
+    int receiveBufferSize;
 
     int rank;
     int processNumber;

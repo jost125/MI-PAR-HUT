@@ -31,7 +31,12 @@ Application::Application(const Application& orig) {
 Application::~Application() {
 	MPI_Finalize();
 
-	delete [] this->buffer;
+	if (this->sendBuffer != NULL) {
+		delete [] this->sendBuffer;
+	}
+	if (this->receiveBuffer != NULL) {
+		delete [] this->receiveBuffer;
+	}
 	if (this->matrix != NULL) {
 		delete this->matrix;
 	}
@@ -43,15 +48,21 @@ Application::~Application() {
 	}
 }
 
-void Application::reallocateBuffer(int size) {
-	delete [] this->buffer;
-	this->bufferSize = size;
-	this->buffer = new char[size];
+void Application::reallocateReceiveBuffer(int size) {
+	delete [] this->receiveBuffer;
+	this->receiveBufferSize = size;
+	this->receiveBuffer = new char[size];
+}
+
+void Application::reallocateSendBuffer(int size) {
+	delete [] this->sendBuffer;
+	this->sendBufferSize = size;
+	this->sendBuffer = new char[size];
 }
 
 void Application::init(int * argc, char *** argv) {
-	this->bufferSize = 1;
-	this->buffer = new char[1];
+	this->sendBuffer = NULL;
+	this->receiveBuffer = NULL;
 	this->matrix = NULL;
 	this->interval = NULL;
 
@@ -104,45 +115,47 @@ void Application::generateMatrix() {
 void Application::receiveInputs() {
 
 	int position = 0;
-	this->reallocateBuffer(4 * sizeof(int));
+	this->reallocateReceiveBuffer(4 * sizeof(int));
 
-	MPI_Recv(buffer, bufferSize, MPI_PACKED, 0, Tags::INPUTS, MPI_COMM_WORLD, &status);
-	MPI_Unpack(buffer, bufferSize, &position, &this->matrixWidth, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(buffer, bufferSize, &position, &this->matrixHeight, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(buffer, bufferSize, &position, &this->maxTokens, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(buffer, bufferSize, &position, &this->pricePerToken, 1, MPI_INT, MPI_COMM_WORLD);
+	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_PACKED, 0, Tags::INPUTS, MPI_COMM_WORLD, &status);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->matrixWidth, 1, MPI_INT, MPI_COMM_WORLD);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->matrixHeight, 1, MPI_INT, MPI_COMM_WORLD);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->maxTokens, 1, MPI_INT, MPI_COMM_WORLD);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->pricePerToken, 1, MPI_INT, MPI_COMM_WORLD);
+}
 
+void Application::receiveMatrix() {
 	this->createMatrix();
 
-	position = 0;
-	this->reallocateBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
+	int position = 0;
+	this->reallocateReceiveBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
 
-	MPI_Recv(buffer, bufferSize, MPI_PACKED, 0, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &status);
-	MPI_Unpack(buffer, bufferSize, &position, this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
+	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_PACKED, 0, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &status);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
 }
 
 void Application::sendMatrix() {
 	this->waitForSend();
 	
 	int position = 0;
-	this->reallocateBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
+	this->reallocateSendBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
 
-	MPI_Pack(this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
 	for (int i = 1; i < this->processNumber; i++) {
-		MPI_Isend(buffer, position, MPI_PACKED, i, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &request);
+		MPI_Isend(sendBuffer, position, MPI_PACKED, i, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &request);
 	}
 }
 
 void Application::sendInputs() {
 	int position = 0;
-	this->reallocateBuffer(4 * sizeof(int));
+	this->reallocateSendBuffer(4 * sizeof(int));
 
-	MPI_Pack(&this->matrixWidth, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->matrixHeight, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->maxTokens, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->pricePerToken, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->matrixWidth, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->matrixHeight, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->maxTokens, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->pricePerToken, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
 	for (int i = 1; i < this->processNumber; i++) {
-		MPI_Isend(buffer, position, MPI_PACKED, i, Tags::INPUTS, MPI_COMM_WORLD, &request);
+		MPI_Isend(sendBuffer, position, MPI_PACKED, i, Tags::INPUTS, MPI_COMM_WORLD, &request);
 	}
 }
 
