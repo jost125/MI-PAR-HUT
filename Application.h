@@ -24,6 +24,14 @@ private:
     void readInputs();
     void sendInputs();
     void receiveInputs();
+
+    void sendMatrix();
+
+    void sendInitIntervals();
+    void sendInterval(ConfigurationInterval interval, int rank);
+
+    bool isSent();
+    void waitForSend();
     
     void generateMatrix();
     void createMatrix();

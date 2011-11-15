@@ -121,45 +121,110 @@ void Application::receiveInputs() {
 	MPI_Unpack(buffer, bufferSize, &position, this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
 }
 
-void Application::sendInputs() {
+void Application::sendMatrix() {
+	this->waitForSend();
+	
+	int position = 0;
+	this->reallocateBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
+
+	MPI_Pack(this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
 	for (int i = 1; i < this->processNumber; i++) {
-		int position = 0;
-		this->reallocateBuffer(4 * sizeof(int));
-
-		MPI_Pack(&this->matrixWidth, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-		MPI_Pack(&this->matrixHeight, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-		MPI_Pack(&this->maxTokens, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-		MPI_Pack(&this->pricePerToken, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
-		MPI_Send(buffer, position, MPI_PACKED, i, Tags::INPUTS, MPI_COMM_WORLD);
-
-		position = 0;
-		this->reallocateBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
-
-		MPI_Pack(this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
 		MPI_Isend(buffer, position, MPI_PACKED, i, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &request);
 	}
 }
 
-void Application::run() {
+void Application::sendInputs() {
+	int position = 0;
+	this->reallocateBuffer(4 * sizeof(int));
 
-//	if (this->rank == 0) {
-		this->readInputs();
-		this->generateMatrix();
-//		this->sendInputs();
-//		MatrixRenderer(matrix).render();
-//	} else {
-//		this->receiveInputs();
-//		MatrixRenderer(matrix).render();
-//	}
+	MPI_Pack(&this->matrixWidth, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->matrixHeight, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->maxTokens, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(&this->pricePerToken, 1, MPI_INT, buffer, bufferSize, &position, MPI_COMM_WORLD);
+	for (int i = 1; i < this->processNumber; i++) {
+		MPI_Isend(buffer, position, MPI_PACKED, i, Tags::INPUTS, MPI_COMM_WORLD, &request);
+	}
+}
 
-	ConfigurationFactory factory = ConfigurationFactory(matrix->getWidth(), matrix->getHeight());
+ConfigurationFactory * Application::getFactory() {
+	if (this->factory == NULL) {
+		this->factory = new ConfigurationFactory(this->matrixWidth, this->matrixHeight);
+	}
+	return this->factory;
+}
 
-	TokenPlacer tp = TokenPlacer(*matrix, factory, maxTokens, pricePerToken);
-
-	Configuration bestConfiguration = tp.findBestConfiguration(
-		factory.createFirstConfiguration(1),
-		factory.createLastConfiguration(maxTokens)
+void Application::sendInitIntervals() {
+	this->interval = new ConfigurationInterval(
+		this->getFactory()->createFirstConfiguration(1),
+		this->getFactory()->createLastConfiguration(this->maxTokens)
 	);
 
-	MatrixRenderer(matrix).render(&bestConfiguration);
+	ConfigurationInterval ** intervals = new ConfigurationInterval * [this->processNumber];
+	intervals[0] = new ConfigurationInterval(*this->interval);
+
+	int from = 0;
+	int jump = 2;
+	int served;
+
+	for (served = 1; served < this->processNumber; served++) {
+		if (intervals[from]->isSplitable(*this->getFactory())) {
+			intervals[served] = new ConfigurationInterval(intervals[from]->split(*this->getFactory()));
+			from++;
+			if (jump == served) {
+				jump *= 2;
+				from = 0;
+			}
+		} else {
+			break;
+		}
+	}
+
+	TRACELN(served);
+
+	for (int i = 0; i < served; i++) {
+//		this->sendInterval(*intervals[i], i);
+		TRACELN(*intervals[i]);
+		delete intervals[i];
+	}
+	delete [] intervals;
+}
+
+bool Application::isSent() {
+	int flag = 0;
+	MPI_Test(&request, &flag, &status);
+	return flag == 1;
+}
+
+void Application::waitForSend() {
+	while (!isSent()) {
+		usleep(100);
+	}
+}
+
+void Application::sendInterval(ConfigurationInterval interval, int rank) {
+	this->waitForSend();
+}
+
+void Application::run() {
+
+	if (this->rank == 0) {
+		this->readInputs();
+		this->generateMatrix();
+		this->sendInputs();
+		this->sendMatrix();
+		this->sendInitIntervals();
+	} else {
+		this->receiveInputs();
+	}
+
+	TRACELN("Process " << this->rank << " done.");
+	
+//	TokenPlacer tp = TokenPlacer(matrix, factory, maxTokens, pricePerToken);
+
+//	Configuration bestConfiguration = tp.findBestConfiguration(
+//		factory.createFirstConfiguration(1),
+//		factory.createLastConfiguration(maxTokens)
+//	);
+//
+//	MatrixRenderer(matrix).render(&bestConfiguration);
 }
