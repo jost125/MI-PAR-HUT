@@ -42,7 +42,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/MatrixRenderer.o \
 	${OBJECTDIR}/Coordinate.o \
-	${OBJECTDIR}/Tags.o \
 	${OBJECTDIR}/ConfigurationFactory.o \
 	${OBJECTDIR}/MatrixRandomGenerator.o \
 	${OBJECTDIR}/ConfigurationInterval.o
@@ -111,11 +110,6 @@ ${OBJECTDIR}/Coordinate.o: Coordinate.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Coordinate.o Coordinate.cpp
-
-${OBJECTDIR}/Tags.o: Tags.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Tags.o Tags.cpp
 
 ${OBJECTDIR}/ConfigurationFactory.o: ConfigurationFactory.cpp 
 	${MKDIR} -p ${OBJECTDIR}

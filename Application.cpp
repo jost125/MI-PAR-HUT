@@ -277,7 +277,8 @@ void Application::sendInitIntervals() {
 	}
 
 	for (int i = served; i < this->processNumber; i++) {
-		this->sendNoJob(i);
+		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::FINISH, MPI_COMM_WORLD, &request);
+		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::END, MPI_COMM_WORLD, &request);
 	}
 	delete [] intervals;
 }
@@ -449,7 +450,6 @@ void Application::checkMessages() {
 						this->sendConfiguration(*this->bestConfiguration, 0);
 					}
 				}
-				this->end = true;
 				break;
 			case Tags::END:
 				this->end = true;
@@ -478,11 +478,18 @@ void Application::finish() {
 		MPI_Reduce(&localBestPrice, &bestPrice, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
 		if (this->rank == 0) {
-			this->sendWhichPrice(bestPrice);
+			Configuration * bestConfiguration;
 
-			Configuration bestConfiguration = this->receiveConfiguration();
+			if (this->bestPrice != bestPrice) {
+				this->sendWhichPrice(bestPrice);
+				bestConfiguration = new Configuration(this->receiveConfiguration());
+			} else {
+				bestConfiguration = this->bestConfiguration;
+			}
 
-			MatrixRenderer(matrix).render(&bestConfiguration);
+			this->sendEnd();
+
+			MatrixRenderer(matrix).render(bestConfiguration);
 		} else {
 			while (!this->end) {
 				this->checkMessages();
