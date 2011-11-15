@@ -15,6 +15,8 @@ public:
     virtual ~Tags();
     static short const INPUTS = 0;
     static short const MATRIX_VALUES = 1;
+    static short const BUFFER_SIZE = 2;
+    static short const CONFIGURATION = 3;
 private:
 
 };
