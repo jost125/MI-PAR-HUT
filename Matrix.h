@@ -15,7 +15,7 @@ class Matrix {
         private:
             int height;
             int width;
-            int ** fields;
+            int * fields;
         public:
             Matrix(int const width, int const height);
             Matrix(const Matrix & orig);
@@ -27,8 +27,8 @@ class Matrix {
             int getHeight() const;
             bool isCoordinateInside(const Coordinate & coordinate) const;
             void initFields();
-            int ** getFields() const;
-            void setFields(int ** fields) const;
+            int * getFields() const;
+            void setFields(int * fields) const;
 };
 
 #endif	/* MATRIX_H */
