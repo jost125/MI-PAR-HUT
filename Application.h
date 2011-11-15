@@ -9,12 +9,17 @@
 #include "Matrix.h"
 #include "ConfigurationFactory.h"
 #include "ConfigurationInterval.h"
+#include "TokenPlacer.h"
 
 #ifndef APP_H
 #define	APP_H
 
 class Application {
 public:
+    static const short NOTOKEN = -1;
+    static const short WHITE = 0;
+    static const short BLACK = 1;
+
     Application(int * argc, char *** argv);
     Application(const Application& orig);
     virtual ~Application();
@@ -29,11 +34,35 @@ private:
     void receiveMatrix();
 
     void sendInitIntervals();
-    void sendInterval(ConfigurationInterval interval, int rank);
-    void receiveInterval();
+    void sendJob(ConfigurationInterval interval, int rank);
+    void receiveJob();
     
+    bool hasToken();
+    void sendToken();
+    void receiveToken();
+
+    void sendFinish();
+    void receiveFinish();
+
+    void finish();
+
     void sendConfiguration(const Configuration & configuration, int rank);
     Configuration receiveConfiguration();
+
+    void sendNoJob(const int & rank);
+    void receiveNoJob();
+    void requestForJob();
+    int receiveJobRequest();
+    void sendWhichPrice(double price);
+    void sendEnd();
+    void receiveEnd();
+    double receivePrice();
+    bool hasJob() const;
+    bool isFinished();
+
+    void checkMessages();
+
+    int getNextRank();
 
     bool isSent();
     void waitForSend();
@@ -45,17 +74,24 @@ private:
     void reallocateReceiveBuffer(int size);
 
     ConfigurationFactory * getFactory();
+    TokenPlacer * getPlacer();
     ConfigurationInterval * getInterval() const;
     void setInterval(ConfigurationInterval * interval);
 
     MPI_Request request;
     MPI_Status status;
 
+    short color;
+    short token;
+
     char * sendBuffer;
     int sendBufferSize;
 
     char * receiveBuffer;
     int receiveBufferSize;
+
+    bool finished;
+    bool end;
 
     int rank;
     int processNumber;
@@ -65,7 +101,11 @@ private:
     int maxTokens;
     int pricePerToken;
 
+    int rankCounter;
+
     Matrix * matrix;
+
+    TokenPlacer * placer;
 
     ConfigurationInterval * interval;
     ConfigurationFactory * factory;

@@ -21,9 +21,12 @@ public:
 
     Configuration getStart() const;
     Configuration getEnd() const;
+
+    bool isEmpty() const;
+    void shiftFirst(const ConfigurationFactory & factory);
 private:
-    Configuration start;
-    Configuration end;
+    Configuration * start;
+    Configuration * end;
 
     Configuration findCenter(const ConfigurationFactory & factory) const;
 };

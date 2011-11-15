@@ -46,6 +46,9 @@ Application::~Application() {
 	if (this->factory != NULL) {
 		delete this->factory;
 	}
+	if (this->placer != NULL) {
+		delete this->placer;
+	}
 }
 
 void Application::reallocateReceiveBuffer(int size) {
@@ -65,10 +68,59 @@ void Application::init(int * argc, char *** argv) {
 	this->receiveBuffer = NULL;
 	this->matrix = NULL;
 	this->interval = NULL;
+	this->request = NULL;
+	this->placer = NULL;
+
+	this->color = this->WHITE;
+	this->finished = false;
+	this->end = false;
 
 	MPI_Init(argc, argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &this->rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &this->processNumber);
+
+	if (this->rank == 0) {
+		this->token = this->WHITE;
+	} else {
+		this->token = this->NOTOKEN;
+	}
+	this->rankCounter = -1;
+}
+
+int Application::getNextRank() {
+	this->rankCounter = ++this->rankCounter % this->processNumber;
+	if (this->rankCounter == this->rank) {
+		return this->getNextRank();
+	}
+
+	return this->rankCounter;
+}
+
+bool Application::hasToken() {
+	return this->token != this->NOTOKEN;
+}
+
+void Application::sendToken() {
+	if (this->rank == 0) {
+		this->token = this->WHITE;
+		this->color = this->WHITE;
+	} else if (this->color == this->BLACK) {
+		this->token = this->BLACK;
+		this->color = this->WHITE;
+	}
+
+	this->waitForSend();
+
+	int desitination = (this->rank + 1) % this->processNumber;
+
+	MPI_Isend(&this->token, 1, MPI_SHORT, desitination, Tags::TOKEN, MPI_COMM_WORLD, &request);
+	COM_PRINTLN(this->rank << " " << (this->token == this->WHITE ? "white" : "black") << " Send token to " << desitination);
+	this->token = this->NOTOKEN;
+}
+
+void Application::receiveToken() {
+	MPI_Recv(&this->token, 1, MPI_SHORT, MPI_ANY_SOURCE, Tags::TOKEN, MPI_COMM_WORLD, &status);
+	COM_PRINTLN(this->rank << " " << (this->token == this->WHITE ? "white" : "black") << " Received token");
 }
 
 void Application::readInputs() {
@@ -122,6 +174,8 @@ void Application::receiveInputs() {
 	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->matrixHeight, 1, MPI_INT, MPI_COMM_WORLD);
 	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->maxTokens, 1, MPI_INT, MPI_COMM_WORLD);
 	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->pricePerToken, 1, MPI_INT, MPI_COMM_WORLD);
+	
+	COM_PRINTLN(this->rank << " Received inputs");
 }
 
 void Application::receiveMatrix() {
@@ -132,6 +186,8 @@ void Application::receiveMatrix() {
 
 	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_PACKED, 0, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &status);
 	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, this->matrix->getFieldsPointer(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
+
+	COM_PRINTLN(this->rank << " Received matrix");
 }
 
 void Application::sendMatrix() {
@@ -164,6 +220,13 @@ ConfigurationFactory * Application::getFactory() {
 		this->factory = new ConfigurationFactory(this->matrixWidth, this->matrixHeight);
 	}
 	return this->factory;
+}
+
+TokenPlacer * Application::getPlacer() {
+	if (this->placer == NULL) {
+		this->placer = new TokenPlacer(matrix, *this->getFactory(), maxTokens, pricePerToken);
+	}
+	return this->placer;
 }
 
 void Application::setInterval(ConfigurationInterval * interval) {
@@ -203,9 +266,13 @@ void Application::sendInitIntervals() {
 		}
 	}
 
-	for (int i = 0; i < served; i++) {
-		this->sendInterval(*intervals[i], i);
+	for (int i = 1; i < served; i++) {
+		this->sendJob(*intervals[i], i);
 		delete intervals[i];
+	}
+
+	for (int i = served; i < this->processNumber; i++) {
+		this->sendNoJob(i);
 	}
 	delete [] intervals;
 }
@@ -217,8 +284,8 @@ bool Application::isSent() {
 }
 
 void Application::waitForSend() {
-	while (!isSent()) {
-		usleep(100);
+	while (this->request != NULL && !isSent()) {
+		usleep(100); // really?
 	}
 }
 
@@ -248,12 +315,16 @@ Configuration Application::receiveConfiguration() {
 	return Configuration(coordinates);
 }
 
-void Application::receiveInterval() {
+void Application::receiveJob() {
+	int rank;
+
+	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::JOB_SENT, MPI_COMM_WORLD, &status);
+
 	this->setInterval(new ConfigurationInterval(
 		this->receiveConfiguration(),
 		this->receiveConfiguration()
 	));
-	TRACELN("Received interval" << *this->getInterval());
+	COM_PRINTLN(this->rank << " Received interval from " << rank << " : " << *this->getInterval());
 }
 
 void Application::sendConfiguration(const Configuration & configuration, int rank) {
@@ -278,10 +349,176 @@ void Application::sendConfiguration(const Configuration & configuration, int ran
 	MPI_Isend(sendBuffer, position, MPI_PACKED, rank, Tags::CONFIGURATION, MPI_COMM_WORLD, &request);
 }
 
-void Application::sendInterval(ConfigurationInterval interval, int rank) {
-	TRACELN("Sending interval" << interval);
+void Application::sendJob(ConfigurationInterval interval, int rank) {
+	this->waitForSend();
+
+	COM_PRINTLN(this->rank << " Sending job to " << rank);
+
+	MPI_Isend(&this->rank, 1, MPI_INT, rank, Tags::JOB_SENT, MPI_COMM_WORLD, &request);
+
 	this->sendConfiguration(interval.getStart(), rank);
 	this->sendConfiguration(interval.getEnd(), rank);
+
+	if (this->rank < rank) {
+		this->waitForSend();
+
+		this->color = BLACK;
+	}
+}
+
+void Application::requestForJob() {
+	this->waitForSend();
+	int requestedRank = this->getNextRank();
+	COM_PRINTLN(this->rank << " Requesting job from process " << requestedRank);
+
+	MPI_Isend(&this->rank, 1, MPI_INT, requestedRank, Tags::JOB_REQUEST, MPI_COMM_WORLD, &request);
+}
+
+void Application::receiveNoJob() {
+	int rank;
+
+	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::JOB_NOJOB, MPI_COMM_WORLD, &status);
+}
+
+int Application::receiveJobRequest() {
+	int rank;
+
+	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::JOB_REQUEST, MPI_COMM_WORLD, &status);
+
+	COM_PRINTLN(this->rank << " Received job request from " << rank);
+
+	return rank;
+}
+
+void Application::sendNoJob(const int & rank) {
+	this->waitForSend();
+	
+	MPI_Isend(&this->rank, 1, MPI_INT, rank, Tags::JOB_NOJOB, MPI_COMM_WORLD, &request);
+}
+
+void Application::checkMessages() {
+	int flag;
+
+	COM_PRINTLN(this->rank << " Checking messages");
+
+	int receivedRank;
+
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+	if (flag) {
+		switch (status.MPI_TAG) {
+			case Tags::JOB_REQUEST:
+				receivedRank = this->receiveJobRequest();
+				if (this->hasJob() && this->getInterval()->isSplitable(*this->getFactory())) {
+					this->sendJob(this->getInterval()->split(*this->getFactory()), receivedRank);
+				} else {
+					this->sendNoJob(receivedRank);
+				}
+				break;
+			case Tags::JOB_SENT:
+				if (!this->hasJob()) {
+					this->receiveJob();
+				} else {
+					// todo refuse
+				}
+				break;
+			case Tags::JOB_NOJOB:
+				this->receiveNoJob();
+				break;
+			case Tags::TOKEN:
+				this->receiveToken();
+				if (this->rank == 0 && this->token == this->WHITE) {
+					this->sendFinish();
+					this->finish();
+				}
+				break;
+			case Tags::FINISH:
+				this->receiveFinish();
+				this->finish();
+				break;
+			case Tags::WHICH_PRICE:
+				if (this->receivePrice() == this->getPlacer()->getBestPrice()) {
+					this->sendConfiguration(this->getPlacer()->getBestConfiguration(), 0);
+				}
+				break;
+			case Tags::END:
+				this->end = true;
+				break;
+		}
+	}
+}
+
+double Application::receivePrice() {
+	double price;
+
+	MPI_Recv(&price, 1, MPI_DOUBLE, 0, Tags::WHICH_PRICE, MPI_COMM_WORLD, &status);
+
+	return price;
+}
+
+void Application::finish() {
+
+	COM_PRINTLN(this->rank << " is finishing");
+
+	this->finished = true;
+
+	double localBestPrice = this->getPlacer()->getBestPrice();
+	double bestPrice;
+
+	MPI_Reduce(&localBestPrice, &bestPrice, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
+	if (this->rank == 0) {
+		this->sendWhichPrice(bestPrice);
+
+		Configuration bestConfiguration = this->receiveConfiguration();
+
+		this->sendEnd();
+
+		MatrixRenderer(matrix).render(&bestConfiguration);
+	} else {
+		while (!this->end) {
+			this->checkMessages();
+		}
+	}
+}
+
+void Application::sendFinish() {
+	this->waitForSend();
+
+	for (int i = 1; i < this->processNumber; i++) {
+		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::FINISH, MPI_COMM_WORLD, &request);
+	}
+}
+
+void Application::sendEnd() {
+	this->waitForSend();
+
+	for (int i = 1; i < this->processNumber; i++) {
+		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::END, MPI_COMM_WORLD, &request);
+	}
+}
+
+void Application::sendWhichPrice(double price) {
+	this->waitForSend();
+
+	for (int i = 1; i < this->processNumber; i++) {
+		MPI_Isend(&price, 1, MPI_DOUBLE, i, Tags::WHICH_PRICE, MPI_COMM_WORLD, &request);
+	}
+}
+
+void Application::receiveFinish() {
+	int rank;
+
+	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::FINISH, MPI_COMM_WORLD, &status);
+
+	COM_PRINTLN(this->rank << " finish received from " << rank);
+}
+
+bool Application::hasJob() const {
+	return this->getInterval() != NULL;
+}
+
+bool Application::isFinished() {
+	return this->finished;
 }
 
 void Application::run() {
@@ -295,17 +532,34 @@ void Application::run() {
 	} else {
 		this->receiveInputs();
 		this->receiveMatrix();
-		this->receiveInterval();
+//		this->receiveInterval();
 	}
 
-	TRACELN("Process " << this->rank << " done.");
-	
-//	TokenPlacer tp = TokenPlacer(matrix, factory, maxTokens, pricePerToken);
+	while (!this->isFinished()) {
+		// periodically check messages
+		this->checkMessages();
 
-//	Configuration bestConfiguration = tp.findBestConfiguration(
-//		factory.createFirstConfiguration(1),
-//		factory.createLastConfiguration(maxTokens)
-//	);
-//
-//	MatrixRenderer(matrix).render(&bestConfiguration);
+		// request job if not having
+		if (!this->hasJob()) {
+			this->requestForJob();
+			usleep(100); // really?
+		} else {
+			// do job
+
+			COM_PRINTLN(this->rank << " Do job");
+
+			this->getPlacer()->findBestConfiguration(this->interval);
+			delete this->interval;
+			this->interval = NULL;
+		}
+
+		COM_PRINTLN(this->rank << " Is idle");
+
+		// idle
+		if (this->hasToken()) {
+			this->sendToken();
+		}
+	}
+	
+	COM_PRINTLN("Process " << this->rank << " done.");
 }

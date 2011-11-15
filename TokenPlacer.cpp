@@ -3,20 +3,21 @@
 #include <iostream>
 #include "Debug.h"
 #include "ConfigurationFactory.h"
+#include "ConfigurationInterval.h"
 
-TokenPlacer::TokenPlacer(const Matrix & matrix, const ConfigurationFactory & configurationFactory, const int maxTokens, const int pricePerToken) :
-		matrix(matrix), configurationFactory(configurationFactory) {
+TokenPlacer::TokenPlacer(Matrix * matrix, const ConfigurationFactory & configurationFactory, const int maxTokens, const int pricePerToken) :
+		factory(factory) {
 	
 	this->matrix = matrix;
-	this->configurationFactory = configurationFactory;
+	this->factory = configurationFactory;
 	this->maxTokens = maxTokens;
 	this->pricePerToken = pricePerToken;
 	std::vector<Coordinate> emptyList = std::vector<Coordinate>();
 	this->bestConfiguration = new Configuration(emptyList);
 }
 
-TokenPlacer::TokenPlacer(const TokenPlacer& orig) : matrix(orig.matrix), configurationFactory(orig.configurationFactory) {
-	this->configurationFactory = orig.configurationFactory;
+TokenPlacer::TokenPlacer(const TokenPlacer& orig) : factory(orig.factory) {
+	this->factory = orig.factory;
 	this->matrix = orig.matrix;
 	this->maxTokens = orig.maxTokens;
 	this->pricePerToken = orig.pricePerToken;
@@ -25,21 +26,6 @@ TokenPlacer::TokenPlacer(const TokenPlacer& orig) : matrix(orig.matrix), configu
 
 TokenPlacer::~TokenPlacer() {
 	delete this->bestConfiguration;
-}
-
-void TokenPlacer::generateEachCombination(const Configuration & start, const Configuration & end) {
-	// Current is starting configuration
-	
-	bool hasNext = true;
-	for (Configuration currentConfiguration = Configuration(start); 
-			hasNext;
-			currentConfiguration = this->configurationFactory.getNextConfiguration(currentConfiguration)) {
-
-		TRACELN(currentConfiguration);
-		// Compare with best solution.
-		this->compareAndSaveSolution(this->countPrice(currentConfiguration), currentConfiguration);
-		hasNext = !currentConfiguration.equals(end);
-	}
 }
 
 void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentConfiguration) {
@@ -53,19 +39,28 @@ void TokenPlacer::compareAndSaveSolution(double price, Configuration & currentCo
 	}
 }
 
-Configuration TokenPlacer::findBestConfiguration(const Configuration & start, const Configuration & end) {
-	this->generateEachCombination(start, end);
-	std::cout << "Max price: " << this->bestPrice << std::endl;
-	
-	return *this->bestConfiguration;
+double TokenPlacer::getBestPrice() const {
+	return this->bestPrice;
+}
+
+Configuration TokenPlacer::getBestConfiguration() const {
+	return Configuration(*this->bestConfiguration);
+}
+
+void TokenPlacer::findBestConfiguration(ConfigurationInterval * interval) {
+	while (!interval->isEmpty()) {
+		Configuration currentConfiguration = interval->getStart();
+		this->compareAndSaveSolution(this->countPrice(currentConfiguration), currentConfiguration);
+		interval->shiftFirst(this->factory);
+	}
 }
 	
 double TokenPlacer::countPrice(const Configuration & configuration) const {
 	double totalPrice = 0;
 	
 	// Count price for each field.
-	for (int x = 0; x < this->matrix.getWidth(); x++) {
-		for (int y = 0; y < this->matrix.getHeight(); y++) {
+	for (int x = 0; x < this->matrix->getWidth(); x++) {
+		for (int y = 0; y < this->matrix->getHeight(); y++) {
 			// Find the shortest way from field to token.
 			int minDistance = -1;
 			for (int k = 0; k < configuration.getCoordinates().size(); k++) {
@@ -82,7 +77,7 @@ double TokenPlacer::countPrice(const Configuration & configuration) const {
 			// We should have minimal distance, so count the price.
 			if (minDistance != -1) {
 				Coordinate c = Coordinate(x, y);
-				totalPrice += (double)this->matrix.getValue(c) / (double)(1 + minDistance);
+				totalPrice += (double)this->matrix->getValue(c) / (double)(1 + minDistance);
 			}
 		}
 	}
