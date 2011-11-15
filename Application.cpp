@@ -131,7 +131,7 @@ void Application::receiveMatrix() {
 	this->reallocateReceiveBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
 
 	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_PACKED, 0, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &status);
-	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, this->matrix->getFieldsPointer(), this->matrixWidth * this->matrixHeight, MPI_INT, MPI_COMM_WORLD);
 }
 
 void Application::sendMatrix() {
@@ -140,7 +140,7 @@ void Application::sendMatrix() {
 	int position = 0;
 	this->reallocateSendBuffer(this->matrixWidth * this->matrixHeight * sizeof(int));
 
-	MPI_Pack(this->matrix->getFields(), this->matrixWidth * this->matrixHeight, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+	MPI_Pack(this->matrix->getFieldsPointer(), this->matrixWidth * this->matrixHeight, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
 	for (int i = 1; i < this->processNumber; i++) {
 		MPI_Isend(sendBuffer, position, MPI_PACKED, i, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &request);
 	}
@@ -166,14 +166,25 @@ ConfigurationFactory * Application::getFactory() {
 	return this->factory;
 }
 
+void Application::setInterval(ConfigurationInterval * interval) {
+	if (this->interval != NULL) {
+		delete interval;
+	}
+	this->interval = interval;
+}
+
+ConfigurationInterval * Application::getInterval() const {
+	return this->interval;
+}
+
 void Application::sendInitIntervals() {
-	this->interval = new ConfigurationInterval(
+	this->setInterval(new ConfigurationInterval(
 		this->getFactory()->createFirstConfiguration(1),
 		this->getFactory()->createLastConfiguration(this->maxTokens)
-	);
+	));
 
 	ConfigurationInterval ** intervals = new ConfigurationInterval * [this->processNumber];
-	intervals[0] = new ConfigurationInterval(*this->interval);
+	intervals[0] = new ConfigurationInterval(*this->getInterval());
 
 	int from = 0;
 	int jump = 2;
@@ -192,11 +203,8 @@ void Application::sendInitIntervals() {
 		}
 	}
 
-	TRACELN(served);
-
 	for (int i = 0; i < served; i++) {
-//		this->sendInterval(*intervals[i], i);
-		TRACELN(*intervals[i]);
+		this->sendInterval(*intervals[i], i);
 		delete intervals[i];
 	}
 	delete [] intervals;
@@ -214,8 +222,66 @@ void Application::waitForSend() {
 	}
 }
 
-void Application::sendInterval(ConfigurationInterval interval, int rank) {
+Configuration Application::receiveConfiguration() {
+	int bufferSize = 0;
+
+	MPI_Recv(&bufferSize, 1, MPI_INT, MPI_ANY_SOURCE, Tags::BUFFER_SIZE, MPI_COMM_WORLD, &status);
+
+	int position = 0;
+	this->reallocateReceiveBuffer(bufferSize);
+
+	int size = (bufferSize) / sizeof(int);
+
+
+	int * data = new int[size];
+
+	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_INT, MPI_ANY_SOURCE, Tags::CONFIGURATION, MPI_COMM_WORLD, &status);
+	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, data, size, MPI_INT, MPI_COMM_WORLD);
+
+	std::vector<Coordinate> coordinates = std::vector<Coordinate>();
+	for (int i = 0; i < size / 2; i++) {
+		coordinates.push_back(Coordinate(data[i * 2], data[i * 2 + 1]));
+	}
+
+	delete [] data;
+
+	return Configuration(coordinates);
+}
+
+void Application::receiveInterval() {
+	this->setInterval(new ConfigurationInterval(
+		this->receiveConfiguration(),
+		this->receiveConfiguration()
+	));
+	TRACELN("Received interval" << *this->getInterval());
+}
+
+void Application::sendConfiguration(const Configuration & configuration, int rank) {
 	this->waitForSend();
+
+	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+
+	int position = 0;
+	this->reallocateSendBuffer(coordinates.size() * 2 * sizeof(int));
+
+	MPI_Isend(&sendBufferSize, 1, MPI_INT, rank, Tags::BUFFER_SIZE, MPI_COMM_WORLD, &request);
+
+	for (int i = 0; i < coordinates.size(); i++) {
+		int x = coordinates[i].getX();
+		int y = coordinates[i].getY();
+		MPI_Pack(&x, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+		MPI_Pack(&y, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
+	}
+
+	this->waitForSend();
+
+	MPI_Isend(sendBuffer, position, MPI_PACKED, rank, Tags::CONFIGURATION, MPI_COMM_WORLD, &request);
+}
+
+void Application::sendInterval(ConfigurationInterval interval, int rank) {
+	TRACELN("Sending interval" << interval);
+	this->sendConfiguration(interval.getStart(), rank);
+	this->sendConfiguration(interval.getEnd(), rank);
 }
 
 void Application::run() {
@@ -228,6 +294,8 @@ void Application::run() {
 		this->sendInitIntervals();
 	} else {
 		this->receiveInputs();
+		this->receiveMatrix();
+		this->receiveInterval();
 	}
 
 	TRACELN("Process " << this->rank << " done.");

@@ -30,6 +30,10 @@ private:
 
     void sendInitIntervals();
     void sendInterval(ConfigurationInterval interval, int rank);
+    void receiveInterval();
+    
+    void sendConfiguration(const Configuration & configuration, int rank);
+    Configuration receiveConfiguration();
 
     bool isSent();
     void waitForSend();
@@ -39,7 +43,10 @@ private:
 
     void reallocateSendBuffer(int size);
     void reallocateReceiveBuffer(int size);
+
     ConfigurationFactory * getFactory();
+    ConfigurationInterval * getInterval() const;
+    void setInterval(ConfigurationInterval * interval);
 
     MPI_Request request;
     MPI_Status status;
