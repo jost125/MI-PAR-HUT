@@ -46,6 +46,8 @@ private:
 
     void finish();
 
+    void doJob();
+
     void sendConfiguration(const Configuration & configuration, int rank);
     Configuration receiveConfiguration();
 
@@ -78,6 +80,8 @@ private:
     ConfigurationInterval * getInterval() const;
     void setInterval(ConfigurationInterval * interval);
 
+    double countPrice(const Configuration & configuration) const;
+
     MPI_Request request;
     MPI_Status status;
 
@@ -101,7 +105,12 @@ private:
     int maxTokens;
     int pricePerToken;
 
+    bool jobRequested;
+
     int rankCounter;
+
+    double bestPrice;
+    Configuration * bestConfiguration;
 
     Matrix * matrix;
 

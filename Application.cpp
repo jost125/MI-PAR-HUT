@@ -49,6 +49,9 @@ Application::~Application() {
 	if (this->placer != NULL) {
 		delete this->placer;
 	}
+	if (this->bestConfiguration != NULL) {
+		delete this->bestConfiguration;
+	}
 }
 
 void Application::reallocateReceiveBuffer(int size) {
@@ -70,10 +73,12 @@ void Application::init(int * argc, char *** argv) {
 	this->interval = NULL;
 	this->request = NULL;
 	this->placer = NULL;
+	this->bestConfiguration = NULL;
 
 	this->color = this->WHITE;
 	this->finished = false;
 	this->end = false;
+	this->jobRequested = false;
 
 	MPI_Init(argc, argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &this->rank);
@@ -368,6 +373,9 @@ void Application::sendJob(ConfigurationInterval interval, int rank) {
 
 void Application::requestForJob() {
 	this->waitForSend();
+
+	this->jobRequested = true;
+	
 	int requestedRank = this->getNextRank();
 	COM_PRINTLN(this->rank << " Requesting job from process " << requestedRank);
 
@@ -376,6 +384,8 @@ void Application::requestForJob() {
 
 void Application::receiveNoJob() {
 	int rank;
+
+	this->jobRequested = false;
 
 	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::JOB_NOJOB, MPI_COMM_WORLD, &status);
 }
@@ -417,8 +427,6 @@ void Application::checkMessages() {
 			case Tags::JOB_SENT:
 				if (!this->hasJob()) {
 					this->receiveJob();
-				} else {
-					// todo refuse
 				}
 				break;
 			case Tags::JOB_NOJOB:
@@ -436,9 +444,12 @@ void Application::checkMessages() {
 				this->finish();
 				break;
 			case Tags::WHICH_PRICE:
-				if (this->receivePrice() == this->getPlacer()->getBestPrice()) {
-					this->sendConfiguration(this->getPlacer()->getBestConfiguration(), 0);
+				if (this->bestConfiguration != NULL) {
+					if (this->receivePrice() == this->bestPrice) {
+						this->sendConfiguration(*this->bestConfiguration, 0);
+					}
 				}
+				this->end = true;
 				break;
 			case Tags::END:
 				this->end = true;
@@ -456,27 +467,26 @@ double Application::receivePrice() {
 }
 
 void Application::finish() {
+	if (this->bestConfiguration != NULL) {
+		COM_PRINTLN(this->rank << " is finishing");
 
-	COM_PRINTLN(this->rank << " is finishing");
+		this->finished = true;
 
-	this->finished = true;
+		double localBestPrice = this->bestPrice;
+		double bestPrice;
 
-	double localBestPrice = this->getPlacer()->getBestPrice();
-	double bestPrice;
+		MPI_Reduce(&localBestPrice, &bestPrice, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-	MPI_Reduce(&localBestPrice, &bestPrice, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+		if (this->rank == 0) {
+			this->sendWhichPrice(bestPrice);
 
-	if (this->rank == 0) {
-		this->sendWhichPrice(bestPrice);
+			Configuration bestConfiguration = this->receiveConfiguration();
 
-		Configuration bestConfiguration = this->receiveConfiguration();
-
-		this->sendEnd();
-
-		MatrixRenderer(matrix).render(&bestConfiguration);
-	} else {
-		while (!this->end) {
-			this->checkMessages();
+			MatrixRenderer(matrix).render(&bestConfiguration);
+		} else {
+			while (!this->end) {
+				this->checkMessages();
+			}
 		}
 	}
 }
@@ -539,18 +549,15 @@ void Application::run() {
 		// periodically check messages
 		this->checkMessages();
 
-		// request job if not having
+		// request for job if not having
 		if (!this->hasJob()) {
-			this->requestForJob();
+			if (!this->jobRequested) {
+				this->requestForJob();
+			}
 			usleep(100); // really?
 		} else {
 			// do job
-
-			COM_PRINTLN(this->rank << " Do job");
-
-			this->getPlacer()->findBestConfiguration(this->interval);
-			delete this->interval;
-			this->interval = NULL;
+			this->doJob();
 		}
 
 		COM_PRINTLN(this->rank << " Is idle");
@@ -562,4 +569,68 @@ void Application::run() {
 	}
 	
 	COM_PRINTLN("Process " << this->rank << " done.");
+}
+
+void Application::doJob() {
+	COM_PRINTLN(this->rank << " Do job");
+	
+	int checkMessagesAfter = 50;
+
+	int i = 0;
+
+	while (!this->interval->isEmpty()) {
+		if ((++i % 50) == 0) {
+			COM_PRINTLN(i);
+			this->checkMessages();
+		}
+		
+		Configuration current = this->interval->getStart();
+
+		double currentPrice = this->countPrice(current);
+
+		if (currentPrice > this->bestPrice) {
+			if (this->bestConfiguration != NULL) {
+				delete this->bestConfiguration;
+			}
+
+			this->bestPrice = currentPrice;
+			this->bestConfiguration = new Configuration(current);
+		}
+
+		this->interval->shiftFirst(*this->getFactory());
+	}
+
+	delete this->interval;
+	this->interval = NULL;
+}
+
+double Application::countPrice(const Configuration & configuration) const {
+	double totalPrice = 0;
+
+	// Count price for each field.
+	for (int x = 0; x < this->matrix->getWidth(); x++) {
+		for (int y = 0; y < this->matrix->getHeight(); y++) {
+			// Find the shortest way from field to token.
+			int minDistance = -1;
+			for (int k = 0; k < configuration.getCoordinates().size(); k++) {
+				int distance = configuration.getCoordinates().at(k).manhattanDistance(Coordinate(x, y));
+				if (distance == 0) {
+					minDistance = distance;
+					break;
+				}
+
+				if (distance < minDistance || minDistance == -1) {
+					minDistance = distance;
+				}
+			}
+			// We should have minimal distance, so count the price.
+			if (minDistance != -1) {
+				Coordinate c = Coordinate(x, y);
+				totalPrice += (double)this->matrix->getValue(c) / (double)(1 + minDistance);
+			}
+		}
+	}
+	// Subtract tokens * pricePerToken.
+	totalPrice -= configuration.getCoordinates().size() * this->pricePerToken;
+	return totalPrice;
 }

@@ -31,7 +31,6 @@ private:
     Matrix * matrix;
     ConfigurationFactory factory;
     Configuration * bestConfiguration;
-    std::vector<Configuration> stack;
     
     void compareAndSaveSolution(double price, Configuration & currentConfiguration);
 };
