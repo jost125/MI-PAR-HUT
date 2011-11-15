@@ -4,11 +4,13 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>Application.h</itemPath>
       <itemPath>Configuration.h</itemPath>
       <itemPath>ConfigurationFactory.h</itemPath>
       <itemPath>ConfigurationInterval.h</itemPath>
       <itemPath>Coordinate.h</itemPath>
       <itemPath>Debug.h</itemPath>
+      <itemPath>Tags.h</itemPath>
       <itemPath>InputReader.h</itemPath>
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
@@ -18,10 +20,12 @@
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>Application.cpp</itemPath>
       <itemPath>Configuration.cpp</itemPath>
       <itemPath>ConfigurationFactory.cpp</itemPath>
       <itemPath>ConfigurationInterval.cpp</itemPath>
       <itemPath>Coordinate.cpp</itemPath>
+      <itemPath>Tags.cpp</itemPath>
       <itemPath>InputReader.cpp</itemPath>
       <itemPath>Matrix.cpp</itemPath>
       <itemPath>MatrixRandomGenerator.cpp</itemPath>
