@@ -15,8 +15,8 @@ class Coordinate {
         Coordinate(int const x, int const y);
         Coordinate(const Coordinate & coordinate);
         virtual ~Coordinate();
-        int getX() const;
-        int getY() const;
+        int const & getX() const;
+        int const & getY() const;
         int manhattanDistance(Coordinate coordinate) const;
         int toIndex(const int matrixWidth) const;
         static Coordinate createCoordinateFromIndex(const int index, const int matrixWidth);

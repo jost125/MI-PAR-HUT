@@ -22,11 +22,11 @@ Coordinate::Coordinate(const Coordinate & coordinate) {
 Coordinate::~Coordinate() {
 }
 
-int Coordinate::getX() const {
+int const & Coordinate::getX() const {
 	return this->x;
 }
 
-int Coordinate::getY() const {
+int const & Coordinate::getY() const {
 	return this->y;
 }
 
