@@ -11,7 +11,6 @@
 #include "MatrixRenderer.h"
 #include "MatrixRandomGenerator.h"
 #include "TokenPlacer.h"
-#include "InputReader.h"
 #include "mpi.h"
 #include "ConfigurationFactory.h"
 #include "Debug.h"
@@ -105,6 +104,10 @@ int Application::getNextRank() {
 
 bool Application::hasToken() {
 	return this->token != this->NOTOKEN;
+}
+
+bool Application::isSingleProcess() {
+	return this->processNumber == 1;
 }
 
 void Application::sendToken() {
@@ -223,12 +226,14 @@ ConfigurationInterval * Application::getInterval() const {
 	return this->interval;
 }
 
-void Application::sendInitIntervals() {
+void Application::initWholeInterval() {
 	this->setInterval(new ConfigurationInterval(
 		this->getFactory()->createFirstConfiguration(1),
 		this->getFactory()->createLastConfiguration(this->maxTokens)
 	));
+}
 
+void Application::sendInitIntervals() {
 	ConfigurationInterval ** intervals = new ConfigurationInterval * [this->processNumber];
 	intervals[0] = new ConfigurationInterval(*this->getInterval());
 
@@ -465,7 +470,9 @@ void Application::finish() {
 				bestConfiguration = this->bestConfiguration;
 			}
 
-			this->sendEnd();
+			if (!this->isSingleProcess()) {
+				this->sendEnd();
+			}
 
 			MatrixRenderer(matrix).render(bestConfiguration);
 
@@ -511,6 +518,7 @@ void Application::receiveFinish() {
 }
 
 bool Application::hasJob() const {
+	COM_PRINTLN("Still has job?");
 	return this->getInterval() != NULL;
 }
 
@@ -522,11 +530,18 @@ void Application::run() {
 
 	if (this->rank == 0) {
 		this->generateMatrix();
-		this->sendMatrix();
-		this->sendInitIntervals();
+		this->initWholeInterval();
+
+		if (this->isSingleProcess()) {
+			this->doJob();
+			this->finish();
+		} else {
+			this->sendMatrix();
+			this->sendInitIntervals();
+		}
+		
 	} else {
 		this->receiveMatrix();
-//		this->receiveInterval();
 	}
 
 	while (!this->isFinished()) {
@@ -563,7 +578,7 @@ void Application::doJob() {
 	int i = 0;
 
 	while (!this->interval->isEmpty()) {
-		if ((++i % checkMessagesAfter) == 0) {
+		if ((++i % checkMessagesAfter) == 0 && !this->isSingleProcess()) {
 			COM_PRINTLN(i);
 			this->checkMessages();
 		}

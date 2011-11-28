@@ -28,6 +28,9 @@ private:
     void init(int * argc, char *** argv);
     void processArguments(int * argc, char *** argv);
 
+    void initWholeInterval();
+    bool isSingleProcess();
+
     void sendMatrix();
     void receiveMatrix();
 

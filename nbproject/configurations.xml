@@ -10,7 +10,6 @@
       <itemPath>ConfigurationInterval.h</itemPath>
       <itemPath>Coordinate.h</itemPath>
       <itemPath>Debug.h</itemPath>
-      <itemPath>InputReader.h</itemPath>
       <itemPath>Matrix.h</itemPath>
       <itemPath>MatrixRandomGenerator.h</itemPath>
       <itemPath>MatrixRenderer.h</itemPath>
@@ -25,7 +24,6 @@
       <itemPath>ConfigurationFactory.cpp</itemPath>
       <itemPath>ConfigurationInterval.cpp</itemPath>
       <itemPath>Coordinate.cpp</itemPath>
-      <itemPath>InputReader.cpp</itemPath>
       <itemPath>Matrix.cpp</itemPath>
       <itemPath>MatrixRandomGenerator.cpp</itemPath>
       <itemPath>MatrixRenderer.cpp</itemPath>
@@ -62,6 +60,9 @@
         <ccTool>
           <architecture>2</architecture>
           <commandlineTool>mpiCC</commandlineTool>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
         </ccTool>
       </compileType>
     </conf>
