@@ -80,6 +80,8 @@ void Application::init(int * argc, char *** argv) {
 	this->end = false;
 	this->jobRequested = false;
 
+	this->processArguments(argc, argv);
+
 	MPI_Init(argc, argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &this->rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &this->processNumber);
@@ -128,24 +130,27 @@ void Application::receiveToken() {
 	COM_PRINTLN(this->rank << " " << (this->token == this->WHITE ? "white" : "black") << " Received token");
 }
 
-void Application::readInputs() {
-	InputReader input = InputReader();
+void Application::processArguments(int * argc, char *** argv) {
+	if (*argc != 5) {
+		cerr << "Usage: " << (*argv)[0] << " <width> <height> <maxTokens> <pricePerToken>" << endl;
+		exit(-1);
+	}
 
 	// Inputs.
 	// Width.
-	if ((matrixWidth = input.readWidth()) < 3) {
+	if ((this->matrixWidth = atoi((*argv)[1])) < 3) {
 		cerr << "Error: Width of matrix must not be less than 3." << endl;
 		exit(-1);
 	}
 
 	// Height.
-	if ((matrixHeight = input.readHeight()) < 3) {
+	if ((this->matrixHeight = atoi((*argv)[2])) < 3) {
 		cerr << "Error: Height of matrix must not be less than 3." << endl;
 		exit(-1);
 	}
 
 	// Max tokens
-	maxTokens = input.readMaxTokens();
+	maxTokens = atoi((*argv)[3]);
 	int maxAllowedTokens = (matrixHeight * matrixWidth) / 2;
 	if (maxTokens < 1 || maxTokens > maxAllowedTokens) {
 		cerr << "Error: Maximum of tokens must be between 1 and " << maxAllowedTokens << "." << endl;
@@ -153,7 +158,7 @@ void Application::readInputs() {
 	}
 
 	// Price per token
-	pricePerToken = input.readPricePerToken();
+	pricePerToken = atoi((*argv)[4]);
 	if (pricePerToken < 1 || pricePerToken > 100) {
 		cerr << "Error: Price for token must be between 1 and 100." << endl;
 		exit(-1);
@@ -167,20 +172,6 @@ void Application::createMatrix() {
 void Application::generateMatrix() {
 	matrix = new Matrix(matrixWidth, matrixHeight);
 	MatrixRandomGenerator(matrix).fillRandom(1, 100);
-}
-
-void Application::receiveInputs() {
-
-	int position = 0;
-	this->reallocateReceiveBuffer(4 * sizeof(int));
-
-	MPI_Recv(receiveBuffer, receiveBufferSize, MPI_PACKED, 0, Tags::INPUTS, MPI_COMM_WORLD, &status);
-	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->matrixWidth, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->matrixHeight, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->maxTokens, 1, MPI_INT, MPI_COMM_WORLD);
-	MPI_Unpack(receiveBuffer, receiveBufferSize, &position, &this->pricePerToken, 1, MPI_INT, MPI_COMM_WORLD);
-	
-	COM_PRINTLN(this->rank << " Received inputs");
 }
 
 void Application::receiveMatrix() {
@@ -204,19 +195,6 @@ void Application::sendMatrix() {
 	MPI_Pack(this->matrix->getFieldsPointer(), this->matrixWidth * this->matrixHeight, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
 	for (int i = 1; i < this->processNumber; i++) {
 		MPI_Isend(sendBuffer, position, MPI_PACKED, i, Tags::MATRIX_VALUES, MPI_COMM_WORLD, &request);
-	}
-}
-
-void Application::sendInputs() {
-	int position = 0;
-	this->reallocateSendBuffer(4 * sizeof(int));
-
-	MPI_Pack(&this->matrixWidth, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->matrixHeight, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->maxTokens, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
-	MPI_Pack(&this->pricePerToken, 1, MPI_INT, sendBuffer, sendBufferSize, &position, MPI_COMM_WORLD);
-	for (int i = 1; i < this->processNumber; i++) {
-		MPI_Isend(sendBuffer, position, MPI_PACKED, i, Tags::INPUTS, MPI_COMM_WORLD, &request);
 	}
 }
 
@@ -490,6 +468,8 @@ void Application::finish() {
 			this->sendEnd();
 
 			MatrixRenderer(matrix).render(bestConfiguration);
+
+			std::cout << this->bestPrice << std::endl;
 		} else {
 			while (!this->end) {
 				this->checkMessages();
@@ -541,13 +521,10 @@ bool Application::isFinished() {
 void Application::run() {
 
 	if (this->rank == 0) {
-		this->readInputs();
 		this->generateMatrix();
-		this->sendInputs();
 		this->sendMatrix();
 		this->sendInitIntervals();
 	} else {
-		this->receiveInputs();
 		this->receiveMatrix();
 //		this->receiveInterval();
 	}
@@ -586,7 +563,7 @@ void Application::doJob() {
 	int i = 0;
 
 	while (!this->interval->isEmpty()) {
-		if ((++i % 50) == 0) {
+		if ((++i % checkMessagesAfter) == 0) {
 			COM_PRINTLN(i);
 			this->checkMessages();
 		}

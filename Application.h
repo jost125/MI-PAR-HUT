@@ -26,9 +26,7 @@ public:
     void run();
 private:
     void init(int * argc, char *** argv);
-    void readInputs();
-    void sendInputs();
-    void receiveInputs();
+    void processArguments(int * argc, char *** argv);
 
     void sendMatrix();
     void receiveMatrix();
