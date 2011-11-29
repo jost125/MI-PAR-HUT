@@ -73,6 +73,7 @@ void Application::init(int * argc, char *** argv) {
 	this->request = NULL;
 	this->placer = NULL;
 	this->bestConfiguration = NULL;
+	this->factory = NULL;
 
 	this->color = this->WHITE;
 	this->finished = false;
