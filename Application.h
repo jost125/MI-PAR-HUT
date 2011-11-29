@@ -36,7 +36,7 @@ private:
 
     void sendInitIntervals();
     void sendJob(ConfigurationInterval interval, int rank);
-    void receiveJob();
+    int receiveJob(bool accept);
     
     bool hasToken();
     void sendToken();
@@ -56,6 +56,8 @@ private:
     void receiveNoJob();
     void requestForJob();
     int receiveJobRequest();
+    bool receiveJobAcceptResult(int rank);
+    void sendJobAcceptResult(bool accepted, int rank);
     void sendWhichPrice(double price);
     void sendEnd();
     void receiveEnd();

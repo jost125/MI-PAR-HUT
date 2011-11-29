@@ -76,8 +76,6 @@ Configuration ConfigurationFactory::getNextConfiguration(Configuration * configu
 		coordinates.push_back(Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrixWidth));
 	}
 
-	COM_PRINTLN("next" << coordinates);
-
 	return Configuration(coordinates);
 }
 

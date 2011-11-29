@@ -260,6 +260,10 @@ void Application::sendInitIntervals() {
 		delete intervals[i];
 	}
 
+	for (int i = 1; i < served; i++) {
+		this->receiveJobAcceptResult(i);
+	}
+
 	for (int i = served; i < this->processNumber; i++) {
 		this->sendNoJob(i);
 	}
@@ -303,16 +307,26 @@ Configuration Application::receiveConfiguration() {
 	return Configuration(coordinates);
 }
 
-void Application::receiveJob() {
+int Application::receiveJob(bool accept) {
 	int rank;
 
 	MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, Tags::JOB_SENT, MPI_COMM_WORLD, &status);
 
-	this->setInterval(new ConfigurationInterval(
-		this->receiveConfiguration(),
-		this->receiveConfiguration()
-	));
-	COM_PRINTLN(this->rank << " Received interval from " << rank << " : " << *this->getInterval());
+	this->sendJobAcceptResult(accept, rank);
+
+	if (accept) {
+		this->setInterval(new ConfigurationInterval(
+			this->receiveConfiguration(),
+			this->receiveConfiguration()
+		));
+
+		COM_PRINTLN(this->rank << " Received interval from " << rank << " : " << *this->getInterval());
+	} else {
+		this->receiveConfiguration();
+		this->receiveConfiguration();
+	}
+
+	return rank;
 }
 
 void Application::sendConfiguration(const Configuration & configuration, int rank) {
@@ -340,7 +354,7 @@ void Application::sendConfiguration(const Configuration & configuration, int ran
 void Application::sendJob(ConfigurationInterval interval, int rank) {
 	this->waitForSend();
 
-	COM_PRINTLN(this->rank << " Sending job to " << rank);
+	COM_PRINTLN(this->rank << " Sending job " << interval << " to " << rank);
 
 	MPI_Isend(&this->rank, 1, MPI_INT, rank, Tags::JOB_SENT, MPI_COMM_WORLD, &request);
 
@@ -383,12 +397,30 @@ int Application::receiveJobRequest() {
 	return rank;
 }
 
+bool Application::receiveJobAcceptResult(int rank) {
+	int accepted = 0;
+
+	MPI_Recv(&accepted, 1, MPI_INT, rank, Tags::JOB_ACCEPTED, MPI_COMM_WORLD, &status);
+
+	COM_PRINTLN(this->rank << " Received job " << (accepted ? "accepted" : "refused" ) << " from " << rank);
+
+	return (bool)accepted;
+}
+
 void Application::sendNoJob(const int & rank) {
 	this->waitForSend();
 
 	COM_PRINTLN(this->rank << " Send no job for " << rank);
 	
 	MPI_Isend(&this->rank, 1, MPI_INT, rank, Tags::JOB_NOJOB, MPI_COMM_WORLD, &request);
+}
+
+void Application::sendJobAcceptResult(bool accepted, int rank) {
+	this->waitForSend();
+	
+	int iAccepted = (int)accepted;
+
+	MPI_Isend(&iAccepted, 1, MPI_INT, rank, Tags::JOB_ACCEPTED, MPI_COMM_WORLD, &request);
 }
 
 void Application::checkMessages() {
@@ -400,18 +432,37 @@ void Application::checkMessages() {
 
 	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	if (flag) {
+
+		COM_PRINTLN(this->rank << " TAG:" << status.MPI_TAG << " FROM RANK:" << status.MPI_SOURCE);
+
 		switch (status.MPI_TAG) {
 			case Tags::JOB_REQUEST:
 				receivedRank = this->receiveJobRequest();
 				if (this->hasJob() && this->getInterval()->isSplitable(this->getFactory())) {
+
+					ConfigurationInterval beforeSplit = ConfigurationInterval(*this->getInterval());
+
 					this->sendJob(this->getInterval()->split(this->getFactory()), receivedRank);
+
+					bool jobAccepted = this->receiveJobAcceptResult(receivedRank);
+					
+					if (jobAccepted) {
+						// ok
+						COM_PRINTLN(receivedRank << " Accepted job from " << this->rank);
+					} else {
+						COM_PRINTLN(receivedRank << " Refused job from " << this->rank);
+						COM_PRINTLN(this->rank << " Settings back interval " << beforeSplit);
+						this->setInterval(new ConfigurationInterval(beforeSplit));
+					}
 				} else {
 					this->sendNoJob(receivedRank);
 				}
 				break;
 			case Tags::JOB_SENT:
 				if (!this->hasJob()) {
-					this->receiveJob();
+					this->receiveJob(true);
+				} else {
+					this->receiveJob(false);
 				}
 				break;
 			case Tags::JOB_NOJOB:
@@ -541,7 +592,9 @@ void Application::run() {
 	if (this->rank == 0) {
 		this->generateMatrix();
 		this->initWholeInterval();
-		
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
 		this->calcTimeStart = MPI_Wtime();
 
 		if (this->isSingleProcess()) {
@@ -549,10 +602,11 @@ void Application::run() {
 			this->finish();
 		} else {
 			this->sendMatrix();
-			this->sendInitIntervals();
+//			this->sendInitIntervals();
 		}
 		
 	} else {
+		MPI_Barrier(MPI_COMM_WORLD);
 		this->receiveMatrix();
 	}
 
@@ -596,6 +650,7 @@ void Application::doJob() {
 		}
 		
 		Configuration current = this->interval->getStart();
+		COM_PRINTLN(current);
 
 		double currentPrice = this->countPrice(current);
 
