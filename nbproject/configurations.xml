@@ -51,6 +51,7 @@
         </cTool>
         <ccTool>
           <architecture>2</architecture>
+          <commandlineTool>mpiCC</commandlineTool>
         </ccTool>
       </compileType>
     </conf>
