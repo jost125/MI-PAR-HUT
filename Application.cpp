@@ -239,9 +239,9 @@ void Application::sendInitIntervals() {
 
 	int from = 0;
 	int jump = 2;
-	int served;
+	int served = 1;
 
-	for (served = 1; served < this->processNumber; served++) {
+	for (; served < this->processNumber; served++) {
 		if (intervals[from]->isSplitable(*this->getFactory())) {
 			intervals[served] = new ConfigurationInterval(intervals[from]->split(*this->getFactory()));
 			from++;
@@ -260,8 +260,7 @@ void Application::sendInitIntervals() {
 	}
 
 	for (int i = served; i < this->processNumber; i++) {
-		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::FINISH, MPI_COMM_WORLD, &request);
-		MPI_Isend(&this->rank, 1, MPI_INT, i, Tags::END, MPI_COMM_WORLD, &request);
+		this->sendNoJob(i);
 	}
 	delete [] intervals;
 }
@@ -287,7 +286,6 @@ Configuration Application::receiveConfiguration() {
 	this->reallocateReceiveBuffer(bufferSize);
 
 	int size = (bufferSize) / sizeof(int);
-
 
 	int * data = new int[size];
 
@@ -386,6 +384,8 @@ int Application::receiveJobRequest() {
 
 void Application::sendNoJob(const int & rank) {
 	this->waitForSend();
+
+	COM_PRINTLN(this->rank << " Send no job for " << rank);
 	
 	MPI_Isend(&this->rank, 1, MPI_INT, rank, Tags::JOB_NOJOB, MPI_COMM_WORLD, &request);
 }
@@ -518,7 +518,6 @@ void Application::receiveFinish() {
 }
 
 bool Application::hasJob() const {
-	COM_PRINTLN("Still has job?");
 	return this->getInterval() != NULL;
 }
 

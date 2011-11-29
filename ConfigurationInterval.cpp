@@ -75,7 +75,7 @@ bool ConfigurationInterval::isSplitable(const ConfigurationFactory & factory) {
 
 	Configuration current = Configuration(*this->start);
 
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
 		current = factory.getNextConfiguration(current);
 		if (current.equals(*this->end)) {
 			return false;
@@ -91,49 +91,71 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 
 	if (sizeDiff == 0) {
 		for (int i = 0; i < endSize; i++) {
+			// Current coordinate of end configuration
 			Coordinate currEnd = end->getCoordinates().at(i);
+			// Current coordinate of start configuration
 			Coordinate currStart = start->getCoordinates().at(i);
 
+			// Their index representation
 			int currEndIndex = currEnd.toIndex(factory.getMatrixWidth());
 			int currStartIndex = currStart.toIndex(factory.getMatrixWidth());
 
+			// Difference between indexes
 			int diff = currEndIndex - currStartIndex;
 
-			if (diff >= 2) {
-				Configuration configuration = Configuration(*end);
-				int coordinateIndex = currStartIndex + diff / 2;
-				
-				for (int j = 0; j < end->getCoordinates().size() - i; j++) {
+			if (diff >= 2) { // If the indexes differ more than 2 from each other
+
+				// Copy start configuration.
+				Configuration configuration = Configuration(*start);
+
+				// Find center of indexes.
+				int coordinateIndex = currStartIndex + diff / 2; 
+
+				// Go through rest coordinates and set them greater then founded new coordinate.
+				for (int j = 0; j < startSize - i; j++) {
 					Coordinate coordinate = Coordinate::createCoordinateFromIndex(
 						coordinateIndex + j,
 						factory.getMatrixWidth()
 					);
-					configuration.setCoordinate(j, coordinate);
+					configuration.setCoordinate(j + i, coordinate);
 				}
 
 				return configuration;
-			} else if (diff == 1) {
-				int previous = currEndIndex;
-				int current = currEndIndex;
+			} else if (diff == 1) { // If the indexes differ about 1 from each other
+				
+				// Remember previous coordinate index.
+				int previous = currStartIndex;
+
+				// Remember current iterated index.
+				int current = currStartIndex;
+
+				// Do we have last iteration?
 				bool lastIteration = false;
-				for (int j = 0; j < endSize - i; j++) {
 
-					lastIteration = j == endSize - i - 1;
-					
-					if (current <= previous - (!lastIteration ? 2 : 3)) {
-						Configuration configuration = Configuration(*end);
+				// Go through rest of coordinates.
+				for (int j = 0; j < startSize - i; j++) {
+					// Currently iterated coordinate index
+					current = start->getCoordinates().at(j + i).toIndex(factory.getMatrixWidth());
 
-						for (int k = 0; k < endSize - i; k++) {
+					// is this last iteration?
+					lastIteration = j >= endSize - i;
+
+					// Previously iterated coordinate from current more then 2 respectively 3?
+					if (current - previous >= (!lastIteration ? 2 : 3)) {
+						Configuration configuration = Configuration(*start);
+
+						// Go through rest of coordinates.
+						for (int k = 0; k < endSize - (i + j); k++) {
 							Coordinate coordinate = Coordinate::createCoordinateFromIndex(
-								currStartIndex + k + 1,
+								current + k + 1,
 								factory.getMatrixWidth()
 							);
-							configuration.setCoordinate(k, coordinate);
+							configuration.setCoordinate(k + j + i, coordinate);
 						}
 
 						return configuration;
 					}
-					previous = end->getCoordinates().at(j).toIndex(factory.getMatrixWidth());
+					previous = current;
 				}
 
 				Configuration configuration = Configuration(*start);
@@ -152,39 +174,58 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 			}
 		}
 	} else if (sizeDiff == 1) {
+		// Number of coordinates in new configuration
 		int newCoordinatesSize = endSize;
 
+		// Index representation of first coordinate from last configuration
 		int endFrontIndex = end->getCoordinates().front().toIndex(factory.getMatrixWidth());
 
-		if (endFrontIndex == 0) {
+		if (endFrontIndex == 0) { // There is possibility of having first configuration from set
+
 			for (int i = 1; i < newCoordinatesSize; i++) {
 				int endCurrentIndex = end->getCoordinates().at(i).toIndex(factory.getMatrixWidth());
-				int indexDifference = (int)(endCurrentIndex + i);
-				if (indexDifference / 2 > 0) {
+				int indexDifference = (int)(endCurrentIndex - i);
+				if ((int)(indexDifference / 2) > 0) {
+
+					int newCoordinateIndex = i - indexDifference / 2;
 
 					Configuration configuration = Configuration(*end);
-					configuration.setCoordinate(i, Coordinate::createCoordinateFromIndex(i - indexDifference, factory.getMatrixWidth()));
+
+					for (int j = 0; j < newCoordinatesSize - i; j++) {
+						configuration.setCoordinate(i + j, Coordinate::createCoordinateFromIndex(newCoordinateIndex + j, factory.getMatrixWidth()));
+					}
 
 					return configuration;
 				}
 			}
 
+			// If we are here, the end configuration is the very first for the number of coordinates.
+			// In that case, we will just increment first coordinate of start configuration
+			// and update the rest to be consists.
+
+			// Copy start
 			Configuration configuration = Configuration(*start);
 			int startFrontIndex = start->getCoordinates().front().toIndex(factory.getMatrixWidth());
 
-			configuration.setCoordinate(0, Coordinate::createCoordinateFromIndex(startFrontIndex + 1, factory.getMatrixWidth()));
+			// Go through all and update.
+			for (int i = 0; i < startSize; i++) {
+				configuration.setCoordinate(i, Coordinate::createCoordinateFromIndex(startFrontIndex + i + 1, factory.getMatrixWidth()));
+			}
 
 			return configuration;
+		} else {
+
+			// It safe to create first configuration for set
+			int index = (int)(endFrontIndex / 2);
+
+			std::vector<Coordinate> coordinates = std::vector<Coordinate>();
+			for (int i = 0; i < newCoordinatesSize; i++) {
+				coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory.getMatrixWidth()));
+			}
+
+			return Configuration(coordinates);
+			
 		}
-
-		int index = (int)(endFrontIndex / 2);
-
-		std::vector<Coordinate> coordinates = std::vector<Coordinate>();
-		for (int i = 0; i < newCoordinatesSize; i++) {
-			coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory.getMatrixWidth()));
-		}
-
-		return Configuration(coordinates);
 	} else {
 		int index = (int)(factory.getMatrixHeight() * factory.getMatrixWidth() / 2);
 
