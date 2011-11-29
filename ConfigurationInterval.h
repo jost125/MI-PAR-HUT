@@ -16,19 +16,19 @@ public:
     ConfigurationInterval(const Configuration & start, const Configuration & end);
     ConfigurationInterval(const ConfigurationInterval& orig);
     virtual ~ConfigurationInterval();
-    ConfigurationInterval split(const ConfigurationFactory & factory);
-    bool isSplitable(const ConfigurationFactory & factory);
+    ConfigurationInterval split(ConfigurationFactory * factory);
+    bool isSplitable(ConfigurationFactory * factory);
 
     Configuration getStart() const;
     Configuration getEnd() const;
 
     bool isEmpty() const;
-    void shiftFirst(const ConfigurationFactory & factory);
+    void shiftFirst(ConfigurationFactory * factory);
 private:
     Configuration * start;
     Configuration * end;
 
-    Configuration findCenter(const ConfigurationFactory & factory) const;
+    Configuration findCenter(ConfigurationFactory * factory) const;
 };
 
 std::ostream & operator << (std::ostream &os, const ConfigurationInterval & interval);

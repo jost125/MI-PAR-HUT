@@ -16,7 +16,7 @@
 
 class TokenPlacer {
 public:
-    TokenPlacer(Matrix * matrix, const ConfigurationFactory & configurationFactory, const int maxTokens, const int pricePerToken);
+    TokenPlacer(Matrix * matrix, ConfigurationFactory * configurationFactory, const int maxTokens, const int pricePerToken);
     TokenPlacer(const TokenPlacer & orig);
     virtual ~TokenPlacer();
     void findBestConfiguration(ConfigurationInterval * interval);
@@ -29,7 +29,7 @@ private:
     int maxTokens;
     int pricePerToken;
     Matrix * matrix;
-    ConfigurationFactory factory;
+    ConfigurationFactory * factory;
     Configuration * bestConfiguration;
     
     void compareAndSaveSolution(double price, Configuration & currentConfiguration);

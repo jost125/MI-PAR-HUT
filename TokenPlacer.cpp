@@ -5,9 +5,7 @@
 #include "ConfigurationFactory.h"
 #include "ConfigurationInterval.h"
 
-TokenPlacer::TokenPlacer(Matrix * matrix, const ConfigurationFactory & configurationFactory, const int maxTokens, const int pricePerToken) :
-		factory(factory) {
-	
+TokenPlacer::TokenPlacer(Matrix * matrix, ConfigurationFactory * configurationFactory, const int maxTokens, const int pricePerToken) {
 	this->matrix = matrix;
 	this->factory = configurationFactory;
 	this->maxTokens = maxTokens;
@@ -16,7 +14,7 @@ TokenPlacer::TokenPlacer(Matrix * matrix, const ConfigurationFactory & configura
 	this->bestConfiguration = new Configuration(emptyList);
 }
 
-TokenPlacer::TokenPlacer(const TokenPlacer& orig) : factory(orig.factory) {
+TokenPlacer::TokenPlacer(const TokenPlacer& orig) {
 	this->factory = orig.factory;
 	this->matrix = orig.matrix;
 	this->maxTokens = orig.maxTokens;

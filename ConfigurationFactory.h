@@ -17,8 +17,8 @@ public:
     virtual ~ConfigurationFactory();
     Configuration createFirstConfiguration(const int & numberOfTokens) const;
     Configuration createLastConfiguration(const int & numberOfTokens) const;
-    Configuration getNextConfiguration(const Configuration & configuration) const;
-    bool isLast(const Configuration & configuration) const;
+    Configuration getNextConfiguration(Configuration * configuration) const;
+    bool isLast(Configuration * configuration) const;
     Configuration createFromIndexes(int * indexes, const int size) const;
 
     int getMatrixWidth() const;

@@ -32,20 +32,28 @@ bool ConfigurationInterval::isEmpty() const {
 	return this->start == NULL;
 }
 
-void ConfigurationInterval::shiftFirst(const ConfigurationFactory & factory) {
+void ConfigurationInterval::shiftFirst(ConfigurationFactory * factory) {
 	if (this->start != NULL) {
 
 
 		if (this->start->equals(*this->end)) {
-			delete this->start;
-			delete this->end;
+			if (this->start != NULL) {
+				delete this->start;
+				this->start = NULL;
 
-			this->start = NULL;
-			this->end = NULL;
+				delete this->end;
+				this->end = NULL;
+			}
 		} else {
-			delete this->start;
 
-			this->start = new Configuration(factory.getNextConfiguration(*this->start));
+			Configuration * tmp = new Configuration(factory->getNextConfiguration(this->start));
+
+			if (this->start != NULL) {
+				delete this->start;
+				this->start = NULL;
+			}
+
+			this->start = tmp;
 		}
 	}
 }
@@ -53,30 +61,29 @@ void ConfigurationInterval::shiftFirst(const ConfigurationFactory & factory) {
 ConfigurationInterval::~ConfigurationInterval() {
 	if (this->start != NULL) {
 		delete this->start;
+		this->start = NULL;
 	}
 	if (this->end != NULL) {
 		delete this->end;
 	}
 }
 
-ConfigurationInterval ConfigurationInterval::split(const ConfigurationFactory & factory) {
+ConfigurationInterval ConfigurationInterval::split(ConfigurationFactory * factory) {
 	Configuration secondEnd = Configuration(*this->end);
 	
 	delete this->end;
 	this->end = new Configuration(this->findCenter(factory));
 
-	return ConfigurationInterval(factory.getNextConfiguration(*this->end), secondEnd);
+	return ConfigurationInterval(factory->getNextConfiguration(this->end), secondEnd);
 }
 
-bool ConfigurationInterval::isSplitable(const ConfigurationFactory & factory) {
+bool ConfigurationInterval::isSplitable(ConfigurationFactory * factory) {
 	if (this->isEmpty()) {
 		return false;
 	}
 
-	Configuration current = Configuration(*this->start);
-
 	for (int i = 0; i < 3; i++) {
-		current = factory.getNextConfiguration(current);
+		Configuration current = factory->getNextConfiguration(this->start);
 		if (current.equals(*this->end)) {
 			return false;
 		}
@@ -84,7 +91,7 @@ bool ConfigurationInterval::isSplitable(const ConfigurationFactory & factory) {
 	return true;
 }
 
-Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & factory) const {
+Configuration ConfigurationInterval::findCenter(ConfigurationFactory * factory) const {
 	int endSize = end->getCoordinates().size();
 	int startSize = start->getCoordinates().size();
 	int sizeDiff = endSize - startSize;
@@ -97,8 +104,8 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 			Coordinate currStart = start->getCoordinates().at(i);
 
 			// Their index representation
-			int currEndIndex = currEnd.toIndex(factory.getMatrixWidth());
-			int currStartIndex = currStart.toIndex(factory.getMatrixWidth());
+			int currEndIndex = currEnd.toIndex(factory->getMatrixWidth());
+			int currStartIndex = currStart.toIndex(factory->getMatrixWidth());
 
 			// Difference between indexes
 			int diff = currEndIndex - currStartIndex;
@@ -115,7 +122,7 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 				for (int j = 0; j < startSize - i; j++) {
 					Coordinate coordinate = Coordinate::createCoordinateFromIndex(
 						coordinateIndex + j,
-						factory.getMatrixWidth()
+						factory->getMatrixWidth()
 					);
 					configuration.setCoordinate(j + i, coordinate);
 				}
@@ -135,7 +142,7 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 				// Go through rest of coordinates.
 				for (int j = 0; j < startSize - i; j++) {
 					// Currently iterated coordinate index
-					current = start->getCoordinates().at(j + i).toIndex(factory.getMatrixWidth());
+					current = start->getCoordinates().at(j + i).toIndex(factory->getMatrixWidth());
 
 					// is this last iteration?
 					lastIteration = j >= endSize - i;
@@ -148,7 +155,7 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 						for (int k = 0; k < endSize - (i + j); k++) {
 							Coordinate coordinate = Coordinate::createCoordinateFromIndex(
 								current + k + 1,
-								factory.getMatrixWidth()
+								factory->getMatrixWidth()
 							);
 							configuration.setCoordinate(k + j + i, coordinate);
 						}
@@ -160,12 +167,12 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 
 				Configuration configuration = Configuration(*start);
 
-				int coordinateIndex = start->getCoordinates().at(i + 1).toIndex(factory.getMatrixWidth());
+				int coordinateIndex = start->getCoordinates().at(i + 1).toIndex(factory->getMatrixWidth());
 
 				for (int j = 1; j < start->getCoordinates().size() - i; j++) {
 					Coordinate coordinate = Coordinate::createCoordinateFromIndex(
 						coordinateIndex + j,
-						factory.getMatrixWidth()
+						factory->getMatrixWidth()
 					);
 					configuration.setCoordinate(j, coordinate);
 				}
@@ -178,12 +185,12 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 		int newCoordinatesSize = endSize;
 
 		// Index representation of first coordinate from last configuration
-		int endFrontIndex = end->getCoordinates().front().toIndex(factory.getMatrixWidth());
+		int endFrontIndex = end->getCoordinates().front().toIndex(factory->getMatrixWidth());
 
 		if (endFrontIndex == 0) { // There is possibility of having first configuration from set
 
 			for (int i = 1; i < newCoordinatesSize; i++) {
-				int endCurrentIndex = end->getCoordinates().at(i).toIndex(factory.getMatrixWidth());
+				int endCurrentIndex = end->getCoordinates().at(i).toIndex(factory->getMatrixWidth());
 				int indexDifference = (int)(endCurrentIndex - i);
 				if ((int)(indexDifference / 2) > 0) {
 
@@ -192,7 +199,7 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 					Configuration configuration = Configuration(*end);
 
 					for (int j = 0; j < newCoordinatesSize - i; j++) {
-						configuration.setCoordinate(i + j, Coordinate::createCoordinateFromIndex(newCoordinateIndex + j, factory.getMatrixWidth()));
+						configuration.setCoordinate(i + j, Coordinate::createCoordinateFromIndex(newCoordinateIndex + j, factory->getMatrixWidth()));
 					}
 
 					return configuration;
@@ -205,11 +212,11 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 
 			// Copy start
 			Configuration configuration = Configuration(*start);
-			int startFrontIndex = start->getCoordinates().front().toIndex(factory.getMatrixWidth());
+			int startFrontIndex = start->getCoordinates().front().toIndex(factory->getMatrixWidth());
 
 			// Go through all and update.
 			for (int i = 0; i < startSize; i++) {
-				configuration.setCoordinate(i, Coordinate::createCoordinateFromIndex(startFrontIndex + i + 1, factory.getMatrixWidth()));
+				configuration.setCoordinate(i, Coordinate::createCoordinateFromIndex(startFrontIndex + i + 1, factory->getMatrixWidth()));
 			}
 
 			return configuration;
@@ -220,20 +227,20 @@ Configuration ConfigurationInterval::findCenter(const ConfigurationFactory & fac
 
 			std::vector<Coordinate> coordinates = std::vector<Coordinate>();
 			for (int i = 0; i < newCoordinatesSize; i++) {
-				coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory.getMatrixWidth()));
+				coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory->getMatrixWidth()));
 			}
 
 			return Configuration(coordinates);
 			
 		}
 	} else {
-		int index = (int)(factory.getMatrixHeight() * factory.getMatrixWidth() / 2);
+		int index = (int)(factory->getMatrixHeight() * factory->getMatrixWidth() / 2);
 
 		int newCoordinatesSize = startSize + ceil((float)sizeDiff / 2);
 
 		std::vector<Coordinate> coordinates = std::vector<Coordinate>();
 		for (int i = 0; i < newCoordinatesSize; i++) {
-			coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory.getMatrixWidth()));
+			coordinates.push_back(Coordinate::createCoordinateFromIndex(index + i, factory->getMatrixWidth()));
 		}
 
 		return Configuration(coordinates);

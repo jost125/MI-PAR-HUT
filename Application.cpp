@@ -211,7 +211,7 @@ ConfigurationFactory * Application::getFactory() {
 
 TokenPlacer * Application::getPlacer() {
 	if (this->placer == NULL) {
-		this->placer = new TokenPlacer(matrix, *this->getFactory(), maxTokens, pricePerToken);
+		this->placer = new TokenPlacer(matrix, this->getFactory(), maxTokens, pricePerToken);
 	}
 	return this->placer;
 }
@@ -243,8 +243,8 @@ void Application::sendInitIntervals() {
 	int served = 1;
 
 	for (; served < this->processNumber; served++) {
-		if (intervals[from]->isSplitable(*this->getFactory())) {
-			intervals[served] = new ConfigurationInterval(intervals[from]->split(*this->getFactory()));
+		if (intervals[from]->isSplitable(this->getFactory())) {
+			intervals[served] = new ConfigurationInterval(intervals[from]->split(this->getFactory()));
 			from++;
 			if (jump == served) {
 				jump *= 2;
@@ -403,8 +403,8 @@ void Application::checkMessages() {
 		switch (status.MPI_TAG) {
 			case Tags::JOB_REQUEST:
 				receivedRank = this->receiveJobRequest();
-				if (this->hasJob() && this->getInterval()->isSplitable(*this->getFactory())) {
-					this->sendJob(this->getInterval()->split(*this->getFactory()), receivedRank);
+				if (this->hasJob() && this->getInterval()->isSplitable(this->getFactory())) {
+					this->sendJob(this->getInterval()->split(this->getFactory()), receivedRank);
 				} else {
 					this->sendNoJob(receivedRank);
 				}
@@ -583,7 +583,7 @@ void Application::run() {
 }
 
 void Application::doJob() {
-	COM_PRINTLN(this->rank << " Do job");
+	COM_PRINTLN(this->rank << " Do job on interval" << *this->getInterval());
 	
 	int checkMessagesAfter = 50;
 
@@ -608,7 +608,7 @@ void Application::doJob() {
 			this->bestConfiguration = new Configuration(current);
 		}
 
-		this->interval->shiftFirst(*this->getFactory());
+		this->interval->shiftFirst(this->getFactory());
 	}
 
 	delete this->interval;

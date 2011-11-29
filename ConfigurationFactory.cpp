@@ -41,11 +41,13 @@ Configuration ConfigurationFactory::createLastConfiguration(const int & numberOf
 	return Configuration(coordinates);
 }
 
-Configuration ConfigurationFactory::getNextConfiguration(const Configuration & configuration) const {
-	std::vector<Coordinate> coordinates = configuration.getCoordinates();
+Configuration ConfigurationFactory::getNextConfiguration(Configuration * configuration) const {
+	Configuration copiedConfiguration = Configuration(*configuration);
+
+	std::vector<Coordinate> coordinates = copiedConfiguration.getCoordinates();
 	int numberOfTokens = coordinates.size();
 
-	if (this->isLast(configuration)) {
+	if (this->isLast(&copiedConfiguration)) {
 		return this->createFirstConfiguration(numberOfTokens + 1);
 	}
 
@@ -74,15 +76,17 @@ Configuration ConfigurationFactory::getNextConfiguration(const Configuration & c
 		coordinates.push_back(Coordinate::createCoordinateFromIndex(++coordinateIndex, this->matrixWidth));
 	}
 
+	COM_PRINTLN("next" << coordinates);
+
 	return Configuration(coordinates);
 }
 
-bool ConfigurationFactory::isLast(const Configuration & configuration) const {
+bool ConfigurationFactory::isLast(Configuration * configuration) const {
 	int position = this->getLastMatrixPosition();
-	int numberOfTokens = configuration.getCoordinates().size();
+	int numberOfTokens = configuration->getCoordinates().size();
 	for (int i = 0; i < numberOfTokens; i++) {
 		Coordinate c = Coordinate::createCoordinateFromIndex(position, this->matrixWidth);
-		if (!configuration.contains(c)) {
+		if (!configuration->contains(c)) {
 			return false;
 		}
 		position--;
