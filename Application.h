@@ -110,6 +110,9 @@ private:
 
     int rankCounter;
 
+    double calcTimeStart;
+    double calcTimeEnd;
+
     double bestPrice;
     Configuration * bestConfiguration;
 

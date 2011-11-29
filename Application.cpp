@@ -473,10 +473,20 @@ void Application::finish() {
 			if (!this->isSingleProcess()) {
 				this->sendEnd();
 			}
+			
+			this->calcTimeEnd = MPI_Wtime();
 
 			MatrixRenderer(matrix).render(bestConfiguration);
 
 			std::cout << this->bestPrice << std::endl;
+
+			cout << "------------------------------------" << endl;
+			cout << "Start at: " << this->calcTimeStart << endl;
+			cout << "End   at: " << this->calcTimeEnd << endl;
+			cout << "Elapsed time was: " << this->calcTimeEnd - this->calcTimeStart << endl;
+			cout << "------------------------------------" << endl;
+
+			
 		} else {
 			while (!this->end) {
 				this->checkMessages();
@@ -530,6 +540,8 @@ void Application::run() {
 	if (this->rank == 0) {
 		this->generateMatrix();
 		this->initWholeInterval();
+		
+		this->calcTimeStart = MPI_Wtime();
 
 		if (this->isSingleProcess()) {
 			this->doJob();
